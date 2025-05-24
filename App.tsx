@@ -53,15 +53,27 @@
 
 
 import React from 'react';
-import { SafeAreaView, StyleSheet, StatusBar } from 'react-native';
-import MessageScreen from './component/testComponent/ListFriend';
+import {StyleSheet, StatusBar, View, SafeAreaView } from 'react-native';
+import MessageScreen from './src/component/testComponent/ListFriend';
+import HomeRegister from './src/pages/auths/HomeRegister';
+import PhoneLogin from './src/pages/auths/PhoneLogin';
+import AuthInput from './src/component/login/AuthInput';
+import EmailLogin from './src/pages/auths/EmailLogin';
+import PasswordInput from './src/pages/auths/PasswordInput';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigation from './src/navigation/AppNavigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Option from './src/component/login/Option';
+import Submit from './src/component/login/Submit';
 
 
 const App: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
-      <MessageScreen />
+        <NavigationContainer>
+          <AppNavigation />
+        </NavigationContainer>
     </SafeAreaView>
   );
 };
