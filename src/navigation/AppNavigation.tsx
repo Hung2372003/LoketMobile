@@ -23,7 +23,7 @@ const AppNavigation: React.FC = () => {
       <Stack.Screen name="PhoneLogin" component={PhoneLogin} />
       <Stack.Screen name="EmailLogin" component={EmailLogin} />
       <Stack.Screen name="PasswordInput" component={PasswordInput} />
-        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };
