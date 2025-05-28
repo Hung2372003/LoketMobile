@@ -2,11 +2,10 @@ import React from 'react';
 import {Image, Text, TouchableOpacity, View } from 'react-native';
 import styles from './style';
 import { RootStackParamList } from '../../navigation/AppNavigation';
-import { StackScreenProps } from '@react-navigation/stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { StackScreenProps } from '@react-navigation/stack';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-
 
 type HomeRegisterProps = NativeStackNavigationProp<RootStackParamList, 'HomeRegister'>;
 
@@ -63,4 +62,4 @@ const HomeRegister: React.FC = () => {
   );
 };
 
-export default HomeRegister
+export default HomeRegister;
