@@ -24,7 +24,6 @@ export const ChatBox:React.FC <{}> = () =>{
         </View>
       </View>
       <ScrollView style={[styles.section]}>
-
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
           content={'Xin chào!\nBạn khỏe không?'}
@@ -32,7 +31,6 @@ export const ChatBox:React.FC <{}> = () =>{
           sentMessage={false}
           startMessage={true}
         />
-
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
           content={'Xin chào!\nBạn khỏe không?'}
@@ -42,7 +40,6 @@ export const ChatBox:React.FC <{}> = () =>{
           endMessage={true}
 
         />
-
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
           content={'Xin chào!\nBạn khỏe không?'}
@@ -51,7 +48,6 @@ export const ChatBox:React.FC <{}> = () =>{
           startMessage={true}
           endMessage={true}
         />
-
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
           content={'Xin chào!\nBạn khỏe không?'}
@@ -60,7 +56,6 @@ export const ChatBox:React.FC <{}> = () =>{
              startMessage={true}
           endMessage={true}
         />
-
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
           content={'Xin chào!\nBạn khỏe không?'}
