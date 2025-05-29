@@ -42,10 +42,10 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
              <Text numberOfLines={1}  ellipsizeMode="tail" style={styles.titleText}>{title}</Text>
         </View>
         {content && (
-          <View style={[styles.content, isRead && styles.approved]}>
-            <Text style={styles.mainContent} numberOfLines={1}>{content}</Text>
-            <Text>·</Text>
-            <Text>{time}</Text>
+          <View style={[styles.content]}>
+            <Text style={[styles.mainContent, isRead && styles.approved]} numberOfLines={1}>{content}</Text>
+            <Text style={[styles.time, isRead && styles.approved]}>·</Text>
+            <Text style={[styles.time, isRead && styles.approved]}>{time}</Text>
           </View>
         )}
       </View>

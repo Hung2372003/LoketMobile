@@ -36,10 +36,10 @@ export const Message: React.FC<MessageProps> = ({
   }) => {
   const styles = MessageStyles;
   const appliedTheme = theme ?? {
-    messageSentBackgroundColor: '#3653E8',
-    messageReceivedBackgroundColor: '#F0F0F0',
-    messageSentColor: 'white',
-    messageReceivedColor: 'black',
+    messageSentBackgroundColor: '#e3e3e3d6',
+    messageReceivedBackgroundColor: '#363636d1',
+    messageSentColor: 'black',
+    messageReceivedColor: 'white',
     hoverIcon: 'rgba(227, 227, 227, 0.7)',
     colorIcon: '#898989',
   };

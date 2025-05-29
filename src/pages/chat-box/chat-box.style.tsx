@@ -31,25 +31,49 @@ export const ChatBoxStyles = StyleSheet.create({
     marginLeft:13,
     marginRight:13,
     minHeight:50,
-    maxHeight:'70%',
+    maxHeight:'60%',
     paddingTop:10,
     paddingBottom:10,
 
   },
+  sendContainer:{
+     backgroundColor:'#363636d1',
+     borderRadius:26,
+     flexDirection:'row',
+     alignItems:'flex-end',
+  },
+  inputContainer:{
+    flexGrow:1,
+    flexShrink:0,
+    flexBasis:0,
+  },
   input:{
-    backgroundColor:'#363636d1',
     width:'100%',
     color:'white',
-    borderRadius:26,
     paddingTop:17,
     paddingLeft:23,
     paddingBottom:17,
-    paddingRight:23,
+    paddingRight:10,
     fontSize:17,
     fontWeight:500,
     alignItems:'center',
     flexDirection:'row',
     textAlignVertical: 'center',
+  },
+  sendButton:{
+    flexGrow:0,
+    flexShrink:0,
+    height:45,
+    aspectRatio:1 / 1,
+    backgroundColor:'#d3d3d36e',
+    marginRight:7,
+    marginBottom:6,
+    borderRadius:25,
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  button:{
+
   },
 });
 

@@ -6,9 +6,11 @@ import PasswordInput from '../pages/auths/PasswordInput';
 import HomeRegister from '../pages/auths/HomeRegister';
 import ProfileScreen from '../pages/about/ProfileScreen.tsx';
 import { ChatBox } from '../pages/chat-box/chat-box.page.tsx';
+import { ChatHistory } from '../pages/chat-history/chat-history.page.tsx';
 
 export type RootStackParamList = {
   ChatBox:undefined;
+  ChatHistory:undefined;
   HomeRegister: undefined;
   PhoneLogin: undefined;
   EmailLogin: undefined;
@@ -18,8 +20,9 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="ChatBox" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="ChatHistory" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ChatBox" component={ChatBox} />
+      <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="HomeRegister" component={HomeRegister} />
       <Stack.Screen name="PhoneLogin" component={PhoneLogin} />
       <Stack.Screen name="EmailLogin" component={EmailLogin} />

@@ -98,18 +98,26 @@ export const ChatBox:React.FC <{}> = () =>{
         />
       </ScrollView>
       <View style={[styles.footer]}>
-        <TextInput
-            style={[styles.input]}
-            placeholder="Gửi tin nhắn..."
-            placeholderTextColor="#ccc"
-            value={text}
-            onChangeText={setText}
-            multiline={true}
-            textAlignVertical="top"
-            blurOnSubmit={false}
-            returnKeyType="default"
-        />
-
+        <View style={[styles.sendContainer]}>
+            <View style={[styles.inputContainer]}>
+                <TextInput
+                  style={[styles.input]}
+                  placeholder="Gửi tin nhắn..."
+                  placeholderTextColor="#ccc"
+                  value={text}
+                  onChangeText={setText}
+                  multiline={true}
+                  textAlignVertical="top"
+                  blurOnSubmit={false}
+                  returnKeyType="default"
+                />
+            </View>
+            <View style={[styles.sendButton]}>
+              <TouchableOpacity style={[styles.button]}>
+                <Feather name="send" size={28} color={'#232323d6'} />
+              </TouchableOpacity>
+            </View>
+        </View>
       </View>
     </View>
  );

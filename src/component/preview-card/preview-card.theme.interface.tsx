@@ -7,4 +7,5 @@ export interface PreviewCardTheme {
   borderOnlineDotColor?: string;
   avatarSize?: number;
   hoverBackgroundColor?: string;
+  avartarBorder?:string;
 }

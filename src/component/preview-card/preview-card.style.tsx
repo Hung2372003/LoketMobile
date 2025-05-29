@@ -7,10 +7,11 @@ export const PreviewCardStyles = (theme: PreviewCardTheme) => {
     // backgroundColor = '#fff',
     titleColor = 'white',
     titleSize = 17,
-    contentColor = 'black',
-    contentApprovedColor = '#898989',
+    contentColor = 'white',
+    contentApprovedColor = '#a5a5a5d6',
     borderOnlineDotColor = '#ffffff',
     avatarSize = 40,
+    avartarBorder = '#363636d1',
   } = theme;
 
   return StyleSheet.create({
@@ -27,8 +28,15 @@ export const PreviewCardStyles = (theme: PreviewCardTheme) => {
       height: avatarSize,
       aspectRatio:1 / 1,
       position: 'relative',
+      borderRadius: avatarSize / 2,
+      borderWidth:3,
+      borderStyle:'solid',
+      borderColor:avartarBorder,
     } as ViewStyle,
     avatar: {
+      borderWidth:2,
+      borderStyle:'solid',
+      borderRadius: avatarSize / 2,
       height: '100%',
       aspectRatio:1 / 1,
     } as ViewStyle,
@@ -53,6 +61,8 @@ export const PreviewCardStyles = (theme: PreviewCardTheme) => {
       flexShrink:1,
       flexBasis:'auto',
       overflow: 'hidden',
+      flexDirection:'column',
+      gap:3,
     } as ViewStyle,
     title: {
         overflow:'hidden',
@@ -68,17 +78,24 @@ export const PreviewCardStyles = (theme: PreviewCardTheme) => {
     content: {
       flexDirection: 'row',
       gap: 3,
-      fontSize: titleSize - 5,
-      fontWeight: 'bold',
-      color: contentColor,
-      flexWrap: 'nowrap',
-    } as TextStyle,
+      alignItems:'center',
+    } as ViewStyle,
     approved: {
       color: contentApprovedColor,
       fontWeight: '600',
     } as TextStyle,
-      mainContent: {
+    mainContent: {
       flexShrink: 1,
+      fontSize: titleSize - 3,
+      fontWeight: 'bold',
+      color: contentColor,
+      flexWrap: 'nowrap',
+    } as TextStyle,
+    time:{
+      color: contentColor,
+      fontSize: titleSize - 5,
+      fontWeight: 'bold',
+
     } as TextStyle,
   });
 };
