@@ -60,7 +60,7 @@ export const Message: React.FC<MessageProps> = ({
       {displayTime && <Text style={styles.time}>{time}</Text>}
 
       <View style={containerStyle}>
-        {!sentMessage && <View style={styles.avatar}>
+        {!sentMessage && avatar && <View style={styles.avatar}>
           {avatarShouldDisplay && !sentMessage && (
             <Image source={{ uri: avatar }} style={styles.avatarImage} />
           )}
