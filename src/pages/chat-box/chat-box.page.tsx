@@ -38,6 +38,7 @@ export const ChatBox:React.FC <{}> = () =>{
           time="10:30 AM"
           sentMessage={false}
           startMessage={true}
+          endMessage={true}
         />
         <Message
           avatar="https://i.imgur.com/2nCt3Sbl.jpg"
