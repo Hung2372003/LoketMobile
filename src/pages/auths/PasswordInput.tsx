@@ -37,7 +37,7 @@ const PasswordInput = () => {
     if (identifier && password) {
       console.log(`Đăng nhập với ${identifier} và mật khẩu: ${password}`);
       Alert.alert(`Đăng nhập thành công với: ${identifier}`);
-      navigation.navigate("ProfileScreen");
+      navigation.navigate('MainScreen');
     } else {
       Alert.alert('Vui lòng nhập mật khẩu.');
     }
