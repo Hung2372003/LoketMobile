@@ -9,6 +9,7 @@ import { ChatBox } from '../pages/chat-box/chat-box.page.tsx';
 import MainScreen from '../pages/main-screen/MainScreen.tsx';
 import {ChatHistory} from '../pages/chat-history/ChatHistory.tsx';
 import FeedScreen from '../pages/main-screen/FeedScreen.tsx';
+import FriendsScreen from '../pages/friends/FriendsScreen.tsx';
 
 export type RootStackParamList = {
   ChatBox:undefined;
@@ -20,6 +21,7 @@ export type RootStackParamList = {
   MainScreen: undefined;
   ChatHistory: undefined;
   FeedScreen: undefined;
+  FriendsScreen: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
@@ -34,6 +36,7 @@ const AppNavigation: React.FC = () => {
       <Stack.Screen name="MainScreen" component={MainScreen} />
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="FeedScreen" component={FeedScreen} />
+      <Stack.Screen name="FriendsScreen" component={FriendsScreen} />
     </Stack.Navigator>
   );
 };
