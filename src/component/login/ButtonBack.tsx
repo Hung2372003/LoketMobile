@@ -16,7 +16,7 @@ const ButtonBack = ({
             style={styles.button_back}
             onPress={onBackPage}
         >
-            <Text style={{color: '#e5e5e5', fontWeight: '300', fontSize: 30}}> {'<'} </Text>
+            <Text style={{color: '#e5e5e5', fontWeight: '300', fontSize: 30}}> ◃ </Text>
         </TouchableOpacity>
     </View>
   )
