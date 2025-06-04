@@ -9,6 +9,7 @@ import { ChatBox } from '../pages/chat-box/chat-box.page.tsx';
 import MainScreen from '../pages/main-screen/MainScreen.tsx';
 import {ChatHistory} from '../pages/chat-history/ChatHistory.tsx';
 import FeedScreen from '../pages/main-screen/FeedScreen.tsx';
+import ListPhotoScreen from "../pages/main-screen/ListPhotoScreen.tsx";
 
 export type RootStackParamList = {
   ChatBox:undefined;
@@ -20,11 +21,12 @@ export type RootStackParamList = {
   MainScreen: undefined;
   ChatHistory: undefined;
   FeedScreen: undefined;
+  ListPhotoScreen: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="FeedScreen" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="ListPhotoScreen" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ChatBox" component={ChatBox} />
       <Stack.Screen name="HomeRegister" component={HomeRegister} />
       <Stack.Screen name="PhoneLogin" component={PhoneLogin} />
@@ -34,6 +36,7 @@ const AppNavigation: React.FC = () => {
       <Stack.Screen name="MainScreen" component={MainScreen} />
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="FeedScreen" component={FeedScreen} />
+      <Stack.Screen name="ListPhotoScreen" component={ListPhotoScreen} />
     </Stack.Navigator>
   );
 };
