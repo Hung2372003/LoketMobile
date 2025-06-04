@@ -26,7 +26,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="FeedScreen" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="HomeRegister" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ChatBox" component={ChatBox} />
       <Stack.Screen name="HomeRegister" component={HomeRegister} />
       <Stack.Screen name="PhoneLogin" component={PhoneLogin} />

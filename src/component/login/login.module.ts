@@ -28,15 +28,15 @@ const styles = StyleSheet.create({
     submit: {
         alignItems: 'center',
         margin: 20,
-        marginBottom: 40,
+        marginBottom: 30,
     },
     fqa: {
         color: '#94908f',
-        fontSize: 12,
+        fontSize: 11,
         marginBottom: 20,
         textAlign: 'center',
         lineHeight: 18,
-        marginHorizontal: 15,
+        marginHorizontal: 5,
     },
     button_change_method :{
         backgroundColor: '#232227',
@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     text_input: {
-        width: 350,
+        width: 320,
         borderRadius: 15,
-        fontSize: 16,
+        fontSize: 18,
         color: '#fff',
         backgroundColor: '#232227',
         paddingLeft: 20,
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     button_continue :{
         backgroundColor: '#232227',
         borderRadius: 30,
-        paddingHorizontal: 150,
+        paddingHorizontal: 110,
         paddingVertical: 15,
     },
 });
