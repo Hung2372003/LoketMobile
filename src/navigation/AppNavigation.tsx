@@ -1,5 +1,6 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import PhoneLogin from '../pages/auths/PhoneLogin';
 import EmailLogin from '../pages/auths/EmailLogin';
 import PasswordInput from '../pages/auths/PasswordInput';
@@ -24,10 +25,31 @@ export type RootStackParamList = {
   FriendsScreen: undefined;
   ListPhotoScreen: undefined;
 };
-const Stack = createNativeStackNavigator<RootStackParamList>();
+// const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="ChatHistory" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="MainScreen" screenOptions={{
+       headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        transitionSpec: {
+          open: {
+            animation: 'timing',
+            config: {
+              duration: 150,
+            },
+          },
+          close: {
+            animation: 'timing',
+            config: {
+              duration: 150,
+            },
+          },
+        },
+        }}>
       <Stack.Screen name="ChatBox" component={ChatBox} />
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="HomeRegister" component={HomeRegister} />

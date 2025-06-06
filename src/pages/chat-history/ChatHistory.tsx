@@ -3,6 +3,10 @@ import { View, FlatList, StyleSheet, TouchableOpacity, Text } from 'react-native
 import { PreviewCard } from '../../component/preview-card/preview-card.component';
 import { PreviewCardTheme } from '../../component/preview-card/preview-card.theme.interface';
 import Feather from '@react-native-vector-icons/feather';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigation';
+import { useNavigation } from '@react-navigation/native';
+type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 interface Message {
   id: string;
   name: string;
@@ -27,6 +31,7 @@ const messages: Message[] = [
 ];
 
 export const ChatHistory: React.FC = () => {
+   const navigation = useNavigation<ChatHistoryNavigationProp>();
 
   const previewCardTheme: PreviewCardTheme = {
     avatarSize:60,
@@ -34,7 +39,7 @@ export const ChatHistory: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={[styles.header]}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Feather name="arrow-left" size={25} color={'white'} />
           </TouchableOpacity>
           <Text style={[styles.text]}>Tin Nhắn</Text>
