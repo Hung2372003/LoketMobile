@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import FontAwesome5 from '@react-native-vector-icons/fontawesome5';
+import { View, Text, Image} from 'react-native';
 import { MessageStyles } from './message.style';
 interface MessageProps {
   avatar?: string;
@@ -31,7 +30,6 @@ export const Message: React.FC<MessageProps> = ({
   startMessage,
   endMessage,
   displayTime,
-  displayAction,
   theme,
   }) => {
   const styles = MessageStyles;
@@ -98,17 +96,6 @@ export const Message: React.FC<MessageProps> = ({
                 {content?.replace(/\\n/g, '\n')}
               </Text>
             </View>
-            {displayAction && <View style={styles.actions}>
-              <TouchableOpacity style={styles.actionItem}>
-                <FontAwesome5 name="smile" size={16} color={appliedTheme.colorIcon} iconStyle="solid" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionItem}>
-                <FontAwesome5 name="share" size={16} color={appliedTheme.colorIcon} iconStyle="solid" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionItem}>
-                <FontAwesome5 name="ellipsis-v" size={16} color={appliedTheme.colorIcon} iconStyle="solid"/>
-              </TouchableOpacity>
-            </View>}
           </View>
         </View>
       </View>
