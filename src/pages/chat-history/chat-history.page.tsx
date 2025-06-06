@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   header:{
-    flexGrow:0,
-    flexShrink:0,
-    flexBasis:0,
+    flexGrow:1,
+    flexShrink:1,
+    flexBasis:'auto',
     flexDirection:'row',
     alignItems:'center',
     gap:10,
