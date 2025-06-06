@@ -68,14 +68,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   header:{
-    flexGrow:1,
-    flexShrink:1,
+
+    flexGrow:0,
+    flexShrink:0,
     flexBasis:'auto',
     flexDirection:'row',
     alignItems:'center',
     gap:10,
-    paddingTop:17,
-    paddingBottom:17,
+    paddingTop:47,
+    paddingBottom:27,
   },
   card:{
     paddingTop:5,
