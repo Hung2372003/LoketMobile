@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, View } from 'react-native';
-import AuthInput from '../../component/login/AuthInput';
-import styles from './style';
-import Option from '../../component/login/Option';
-import Submit from '../../component/login/Submit';
-import ButtonBack from '../../component/login/ButtonBack';
+import AuthInput from '../../../component/login/AuthInput';
+import styles from '../style';
+import Option from '../../../component/login/Option';
+import Submit from '../../../component/login/Submit';
+import ButtonBack from '../../../component/login/ButtonBack';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigation';
+import { RootStackParamList } from '../../../navigation/AppNavigation';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 
 type PasswordInputRouteProps = RouteProp<RootStackParamList, 'PasswordInput'>;
@@ -68,6 +68,7 @@ const PasswordInput = () => {
           <View style={{flex: 1}} />
           <Submit
             onSubmit={handleLogin}
+            disabled={!password}
           />
       </View>
     </KeyboardAvoidingView>

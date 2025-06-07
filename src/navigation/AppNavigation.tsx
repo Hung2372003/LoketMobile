@@ -1,9 +1,11 @@
 import React from 'react';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
-import PhoneLogin from '../pages/auths/PhoneLogin';
-import EmailLogin from '../pages/auths/EmailLogin';
-import PasswordInput from '../pages/auths/PasswordInput';
+import PhoneLogin from '../pages/auths/login/PhoneLogin.tsx';
+import EmailLogin from '../pages/auths/login/EmailLogin.tsx';
+import PasswordInput from '../pages/auths/login/PasswordInput.tsx';
+import RegisterEmail from '../pages/auths/register/RegisterEmail.tsx';
+import RegisterPassword from '../pages/auths/register/RegisterPassword.tsx';
 import HomeRegister from '../pages/auths/HomeRegister';
 import ProfileScreen from '../pages/about/ProfileScreen.tsx';
 import { ChatBox } from '../pages/chat-box/chat-box.page.tsx';
@@ -18,6 +20,8 @@ export type RootStackParamList = {
   PhoneLogin: undefined;
   EmailLogin: undefined;
   PasswordInput: { email?: string, phone?: string };
+  RegisterEmail: undefined;
+  RegisterPassword: { email: string};
   ProfileScreen: undefined;
   MainScreen: undefined;
   ChatHistory: undefined;
@@ -30,7 +34,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="MainScreen" screenOptions={{
+    <Stack.Navigator initialRouteName="HomeRegister" screenOptions={{
        headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
@@ -56,6 +60,8 @@ const AppNavigation: React.FC = () => {
       <Stack.Screen name="PhoneLogin" component={PhoneLogin} />
       <Stack.Screen name="EmailLogin" component={EmailLogin} />
       <Stack.Screen name="PasswordInput" component={PasswordInput} />
+      <Stack.Screen name="RegisterEmail" component={RegisterEmail} />
+      <Stack.Screen name="RegisterPassword" component={RegisterPassword} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="MainScreen" component={MainScreen} />
       <Stack.Screen name="FeedScreen" component={FeedScreen} />

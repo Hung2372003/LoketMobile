@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import { Friend, AppLinkData } from '../../types/friend';
 import { colors, typography, spacing } from './friend.style'; // Theme
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 type FriendsScreenProps = NativeStackNavigationProp<RootStackParamList, 'FriendsScreen'>;
 
@@ -32,7 +32,7 @@ const ANIMATION_DURATION_BACK = 200;
 
 // Mock data (nên đặt ở một file riêng nếu lớn hoặc lấy từ API)
 const MOCK_FRIENDS_DATA: Friend[] = [
-  { id: '1', name: 'Chiem Pham', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
+  { id: '1', name: 'Chien Pham', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
   { id: '2', name: 'Huy Phuc', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
   { id: '3', name: 'Hung Van', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
 ];
@@ -51,7 +51,30 @@ const FriendsScreen: React.FC = () => {
   const opacity = useRef(new Animated.Value(1)).current;
   const [isAtTop, setIsAtTop] = useState(true);
   const [searchText, setSearchText] = useState('');
-   const navigation = useNavigation<FriendsScreenProps>();
+  const navigation = useNavigation<FriendsScreenProps>();
+
+   useFocusEffect(
+    useCallback(() => {
+      // Hàm này sẽ được gọi mỗi khi màn hình được focus (hiển thị)
+      console.log("FriendsScreen is focused. Resetting animations.");
+
+      // Reset lại vị trí và độ mờ của màn hình ngay lập tức
+      // mà không cần animation.
+      pan.setValue({ x: 0, y: 0 });
+      opacity.setValue(1);
+      // Đảm bảo trạng thái isAtTop cũng được reset nếu cần
+      setIsAtTop(true);
+
+      // Hàm dọn dẹp (cleanup) sẽ chạy khi màn hình bị unfocus.
+      // Không bắt buộc cho trường hợp này nhưng nên biết.
+      return () => {
+        console.log("FriendsScreen is unfocused.");
+        // Bạn cũng có thể hủy các animation đang chạy ở đây nếu cần
+        pan.stopAnimation();
+        opacity.stopAnimation();
+      };
+    }, [pan, opacity]) // Dependencies của useCallback
+  );
 
   const panResponder = useRef(
     PanResponder.create({
@@ -128,19 +151,20 @@ const FriendsScreen: React.FC = () => {
           <View style={styles.pullDownHandle} />
         </View>
 
+        <View style={styles.fixedContentWrapper}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Bạn bè của bạn</Text>
+            <Text style={styles.subtitle}>3 / 20 người bạn đã được bổ sung</Text>
+          </View>
+          <SearchBarFriends value={searchText} onChangeText={setSearchText} />
+        </View>
+
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollViewContent}
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>Bạn bè của bạn</Text>
-            <Text style={styles.subtitle}>4 / 20 người bạn đã được bổ sung</Text>
-          </View>
-
-          <SearchBarFriends value={searchText} onChangeText={setSearchText} />
-
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Tìm bạn bè từ các ứng dụng khác</Text>
             <View style={styles.appLinksContainer}>
@@ -198,12 +222,17 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     backgroundColor: colors.tertiaryText,
   },
+  // cho phần cố định
+  fixedContentWrapper: {
+    paddingHorizontal: spacing.large, // Giữ padding ngang cho đồng bộ
+    // Không cần flex ở đây
+  },
   scrollView: {
-    flex: 1, // Để ScrollView chiếm không gian còn lại
+    flex: 1, // Để ScrollView chiếm hết không gian còn lại
   },
   scrollViewContent: {
-    paddingHorizontal: spacing.large,
-    paddingTop: spacing.small, // Nội dung bắt đầu ngay dưới thanh kéo (hoặc 0 nếu thanh kéo đã có paddingBottom)
+    paddingHorizontal: spacing.large, // Giữ padding ngang cho nội dung cuộn
+    paddingTop: spacing.small, // Khoảng cách nhỏ từ thanh search xuống
     paddingBottom: spacing.large,
   },
   header: {
