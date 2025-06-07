@@ -17,6 +17,10 @@ const HomeRegister: React.FC = () => {
     navigation.navigate('PhoneLogin');
   };
 
+  const handleRegister = () => {
+    navigation.navigate('RegisterEmail');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.slide}>
@@ -50,7 +54,12 @@ const HomeRegister: React.FC = () => {
         <Text style={{color: '#b6b7b1', fontWeight: 'bold', fontSize: 20}}>ngay trên màn hình chính</Text>
       </View>
       <View style={styles.regis}>
-        <TouchableOpacity style={styles.button_register}><Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 5}}>Tạo một tài khoản</Text></TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button_register}
+          onPress={handleRegister}
+        >
+          <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 5}}>Tạo một tài khoản</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.button_login}
           onPress={handleLogin}

@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
     back: {
         marginTop: 40,
         marginLeft: 20,
+        justifyContent: 'center',
     },
     button_back :{
         backgroundColor: '#232227',
@@ -21,6 +22,15 @@ const styles = StyleSheet.create({
         borderRadius: '50%',
         justifyContent: 'center',
         alignItems: 'center',
+        position: "relative"
+    },
+    backArrow: {
+        color: '#e5e5e5',
+        fontWeight: '400',
+        fontSize: 35,
+        position: 'absolute',
+        top: -6,
+        left: 5,
     },
     input: {
         alignItems: 'center',

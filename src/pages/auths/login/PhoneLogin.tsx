@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, View } from 'react-native';
-import AuthInput from '../../component/login/AuthInput';
-import styles from './style';
-import { RootStackParamList } from '../../navigation/AppNavigation';
+import AuthInput from '../../../component/login/AuthInput';
+import styles from '../style';
+import { RootStackParamList } from '../../../navigation/AppNavigation';
 import { StackScreenProps } from '@react-navigation/stack';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-import Option from '../../component/login/Option';
-import Submit from '../../component/login/Submit';
-import ButtonBack from '../../component/login/ButtonBack';
+import Option from '../../../component/login/Option';
+import Submit from '../../../component/login/Submit';
+import ButtonBack from '../../../component/login/ButtonBack';
 
 type PhoneLoginProps = NativeStackNavigationProp<RootStackParamList, 'PhoneLogin'>;
 
@@ -52,6 +52,7 @@ const PhoneLogin: React.FC = () => {
           <View style={{flex: 1}} />
           <Submit
             onSubmit={handleNext}
+            disabled={!phone}
           />
 
     </KeyboardAvoidingView>
