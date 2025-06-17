@@ -8,7 +8,7 @@ export const colors = {
   accent: '#0A84FF', // Một màu nhấn (ví dụ)
   messengerBlue: '#0078FF',
   zaloBlue: '#0068FF',
-  instagramPink: '#C13584',
+  instagramWhite: '#fff',
   iconDefault: '#555555',
   // ... thêm các màu khác
 };

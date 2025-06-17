@@ -3,34 +3,28 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Animated,
   PanResponder,
   Dimensions,
   StyleSheet,
   StatusBar,
-  // ImageSourcePropType, // không cần nếu avatar đã được typed trong Friend
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-
-// Imports từ cấu trúc mới
 import FriendItem from '../../component/friends/FriendItem';
 import AppLink from '../../component/friends/AppLink';
 import SearchBarFriends from '../../component/friends/SearchBarFriends';
 import { Friend, AppLinkData } from '../../types/friend';
-import { colors, typography, spacing } from './friend.style'; // Theme
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigation';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { colors, typography, spacing } from './friend.style';
+import { useFocusEffect} from '@react-navigation/native';
 
-type FriendsScreenProps = NativeStackNavigationProp<RootStackParamList, 'FriendsScreen'>;
+interface FriendsScreenProps {
+  navigation: any; // Replace with proper navigation type
+}
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PULL_THRESHOLD = SCREEN_HEIGHT * 0.25;
 const ANIMATION_DURATION_OUT = 300;
 const ANIMATION_DURATION_BACK = 200;
 
-// Mock data (nên đặt ở một file riêng nếu lớn hoặc lấy từ API)
 const MOCK_FRIENDS_DATA: Friend[] = [
   { id: '1', name: 'Chien Pham', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
   { id: '2', name: 'Huy Phuc', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
@@ -38,25 +32,22 @@ const MOCK_FRIENDS_DATA: Friend[] = [
 ];
 
 const MOCK_APP_LINKS_DATA: AppLinkData[] = [
-  { id: 'app1', appName: 'Messenger', isImage: true, imageSource: require('../../assets/logo_locket.png'), iconColor: colors.messengerBlue }, // Sử dụng màu từ theme
-  { id: 'app2', appName: 'Zalo', isImage: true, imageSource: require('../../assets/logo_locket.png'), iconColor: colors.zaloBlue },
-  { id: 'app3', appName: 'Insta', isImage: true, imageSource: require('../../assets/logo_locket.png'), iconColor: colors.instagramPink },
-  { id: 'app4', appName: 'Khác', iconName: 'share-social-outline', iconColor: colors.iconDefault },
+  { id: 'app1', appName: 'Messenger', isImage: true, imageSource: require('../../assets/messenger.png') },
+  { id: 'app2', appName: 'Zalo', isImage: true, imageSource: require('../../assets/zalo.jpg') },
+  { id: 'app3', appName: 'Insta', isImage: true, imageSource: require('../../assets/instagram2.jpg')},
+  { id: 'app4', appName: 'Khác', iconColor: colors.iconDefault },
 ];
 
 
 
-const FriendsScreen: React.FC = () => {
+const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
   const pan = useRef(new Animated.ValueXY()).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const [isAtTop, setIsAtTop] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const navigation = useNavigation<FriendsScreenProps>();
 
    useFocusEffect(
     useCallback(() => {
-      // Hàm này sẽ được gọi mỗi khi màn hình được focus (hiển thị)
-      console.log("FriendsScreen is focused. Resetting animations.");
 
       // Reset lại vị trí và độ mờ của màn hình ngay lập tức
       // mà không cần animation.
@@ -68,12 +59,10 @@ const FriendsScreen: React.FC = () => {
       // Hàm dọn dẹp (cleanup) sẽ chạy khi màn hình bị unfocus.
       // Không bắt buộc cho trường hợp này nhưng nên biết.
       return () => {
-        console.log("FriendsScreen is unfocused.");
-        // Bạn cũng có thể hủy các animation đang chạy ở đây nếu cần
         pan.stopAnimation();
         opacity.stopAnimation();
       };
-    }, [pan, opacity]) // Dependencies của useCallback
+    }, [pan, opacity])
   );
 
   const panResponder = useRef(
@@ -104,7 +93,7 @@ const FriendsScreen: React.FC = () => {
               useNativeDriver: true,
             }),
           ]).start(() => {
-            navigation.navigate('FeedScreen');
+            navigation.navigate('MainScreen');
           });
         } else {
           Animated.parallel([
@@ -184,13 +173,6 @@ const FriendsScreen: React.FC = () => {
               />
             ))}
           </View>
-
-          {/* <TouchableOpacity style={styles.seeMoreButton}>
-            <Text style={styles.seeMoreText}>Xem thêm</Text>
-            <Icon name="chevron-down-outline" size={18} color={colors.secondaryText} />
-          </TouchableOpacity> */}
-
-          {/* Khoảng trống ở cuối để có thể kéo qua ngưỡng dễ dàng hơn */}
           <View style={{ height: PULL_THRESHOLD * 1.5 }} />
         </ScrollView>
       </Animated.View>
@@ -214,7 +196,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.medium, // Khoảng cách từ đỉnh màn hình tới thanh kéo
     paddingBottom: spacing.small, // Khoảng cách dưới thanh kéo
     alignItems: 'center',
-    // backgroundColor: colors.background, // Cùng màu nền để hòa hợp
   },
   pullDownHandle: {
     width: 40,
@@ -222,17 +203,15 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     backgroundColor: colors.tertiaryText,
   },
-  // cho phần cố định
   fixedContentWrapper: {
-    paddingHorizontal: spacing.large, // Giữ padding ngang cho đồng bộ
-    // Không cần flex ở đây
+    paddingHorizontal: spacing.large,
   },
   scrollView: {
-    flex: 1, // Để ScrollView chiếm hết không gian còn lại
+    flex: 1,
   },
   scrollViewContent: {
-    paddingHorizontal: spacing.large, // Giữ padding ngang cho nội dung cuộn
-    paddingTop: spacing.small, // Khoảng cách nhỏ từ thanh search xuống
+    paddingHorizontal: spacing.large,
+    paddingTop: spacing.small,
     paddingBottom: spacing.large,
   },
   header: {
