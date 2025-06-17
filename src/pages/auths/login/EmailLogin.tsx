@@ -4,17 +4,15 @@ import AuthInput from '../../../component/login/AuthInput';
 import styles from '../style';
 import Option from '../../../component/login/Option';
 import Submit from '../../../component/login/Submit';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../navigation/AppNavigation';
-import { useNavigation } from '@react-navigation/native';
 import ButtonBack from '../../../component/login/ButtonBack';
 
-type EmailLoginProps = NativeStackNavigationProp<RootStackParamList, 'EmailLogin'>;
+interface EmailLoginProps {
+  navigation: any; // Replace with proper navigation type
+}
 
-const EmailLogin = () => {
+const EmailLogin: React.FC<EmailLoginProps> = ({ navigation })  => {
 
   const [email, setEmail] = useState('');
-  const navigation = useNavigation<EmailLoginProps>();
 
   const handleBack = () => {
     navigation.navigate('HomeRegister');
@@ -22,7 +20,7 @@ const EmailLogin = () => {
 
   const handleNext = () => {
     if (email) {
-      navigation.navigate('PasswordInput', { email: email }); // Truyền phone
+      navigation.navigate('PasswordInput', { email: email }); // Truyền
     } else {
       Alert.alert('Vui lòng nhập số điện thoại.');
     }

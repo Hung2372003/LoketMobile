@@ -5,18 +5,21 @@ import styles from '../style';
 import Option from '../../../component/login/Option';
 import Submit from '../../../component/login/Submit';
 import ButtonBack from '../../../component/login/ButtonBack';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/AppNavigation';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import authService from '../../../services/authService';
+import storage from '../../../api/storage'
 
 type PasswordInputRouteProps = RouteProp<RootStackParamList, 'PasswordInput'>;
-type PasswordInputProps = NativeStackNavigationProp<RootStackParamList, 'PasswordInput'>;
 
-const PasswordInput = () => {
+interface PasswordInputProps {
+  navigation: any; // Replace with proper navigation type
+}
+
+const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
   const [password, setPassword] = useState('');
   const route = useRoute<PasswordInputRouteProps>();
-  const navigation = useNavigation<PasswordInputProps>();
   const [identifier, setIdentifier] = useState('');
 
   useEffect(() => {
@@ -33,13 +36,17 @@ const PasswordInput = () => {
     navigation.goBack();
   };
 
-  const handleLogin = () => {
-    if (identifier && password) {
-      console.log(`Đăng nhập với ${identifier} và mật khẩu: ${password}`);
-      Alert.alert(`Đăng nhập thành công với: ${identifier}`);
+  const handleLogin = async () => {
+    try {
+      const { token, userId, title } = await authService.login(identifier, password);
+
+      await storage.storeTokens(token);
+
+      Alert.alert(title);
       navigation.navigate('MainScreen');
-    } else {
-      Alert.alert('Vui lòng nhập mật khẩu.');
+
+    } catch (error) {
+      Alert.alert('Đăng nhập thất bại');
     }
   };
 

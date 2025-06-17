@@ -1,7 +1,7 @@
 // src/components/features/friends/FriendItem.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ImageSourcePropType } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import Feather from '@react-native-vector-icons/feather';
 import { Friend } from '../../types/friend'; // Import type
 
 interface FriendItemProps extends Friend {
@@ -14,7 +14,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ id, avatar, name, onRemove }) =
       <Image source={{uri: avatar}} style={styles.friendAvatar} />
       <Text style={styles.friendName}>{name}</Text>
       <TouchableOpacity onPress={() => onRemove(id)} style={styles.removeButton}>
-        <Icon name="close-outline" size={24} color="#A0A0A0" />
+        <Feather name="x" size={24} color="#A0A0A0" />
       </TouchableOpacity>
     </View>
   );

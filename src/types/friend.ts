@@ -8,8 +8,7 @@ export interface Friend {
 export interface AppLinkData {
   id: string;
   appName: string;
-  iconName?: string; // Cho react-native-vector-icons
   iconColor?: string;
   isImage?: boolean;
   imageSource?: any; // ImageSourcePropType
-}
+};

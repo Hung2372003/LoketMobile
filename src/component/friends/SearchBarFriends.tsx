@@ -1,7 +1,7 @@
 // src/components/features/friends/SearchBarFriends.tsx
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Feather from '@react-native-vector-icons/feather';
 
 interface SearchBarFriendsProps {
   placeholder?: string;
@@ -16,7 +16,7 @@ const SearchBarFriends: React.FC<SearchBarFriendsProps> = ({
 }) => {
   return (
     <View style={styles.searchSection}>
-      <Icon name="search-outline" size={20} color="#8E8E93" style={styles.searchIcon} />
+      <Feather name="search" size={18} color="#8E8E93" style={styles.searchIcon} />
       <TextInput
         placeholder={placeholder}
         placeholderTextColor="#8E8E93"
