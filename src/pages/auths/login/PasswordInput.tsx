@@ -58,7 +58,9 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={'height'}>
-      <View style={styles.container}>
+      <View 
+        style={styles.container}
+      >
           <ButtonBack onBackPage={handleBack} />
           <View style={{flex: 1}} />
           <AuthInput

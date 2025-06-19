@@ -1,38 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, View } from 'react-native';
 import AuthInput from '../../../component/login/AuthInput';
 import styles from '../style';
 import Submit from '../../../component/login/Submit';
 import ButtonBack from '../../../component/login/ButtonBack';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/AppNavigation';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 type RegisterPasswordRouteProps = RouteProp<RootStackParamList, 'RegisterPassword'>;
-type RegisterPasswordProps = NativeStackNavigationProp<RootStackParamList, 'RegisterPassword'>;
+interface RegisterPasswordProps {
+  navigation: any;
+}
 
-const RegisterPassword = () => {
+const RegisterPassword: React.FC<RegisterPasswordProps> = ({navigation}) => {
 
   const [password, setPassword] = useState('');
   const route = useRoute<RegisterPasswordRouteProps>();
-  const navigation = useNavigation<RegisterPasswordProps>();
-  const [identifier, setIdentifier] = useState('');
-
-  useEffect(() => {
-    // Lấy email hoặc phone từ route params
-    const { email} = route.params;
-    setIdentifier(email);
-  }, [route.params]);
+  const { email } = route.params;
 
   const handleBack = () => {
     navigation.goBack();
   };
 
-  const handleRegister = () => {
-    if (identifier && password) {
-      // console.log(`Đăng nhập với ${identifier} và mật khẩu: ${password}`);
-      // Alert.alert(`Đăng nhập thành công với: ${identifier}`);
-      navigation.navigate('MainScreen');
+  const handleRegisterName = () => {
+    if (email && password) {
+      navigation.navigate('RegisterName', { email: email, password: password});
     } else {
       Alert.alert('Vui lòng nhập mật khẩu.');
     }
@@ -53,7 +45,7 @@ const RegisterPassword = () => {
           />
           <View style={{flex: 1}} />
           <Submit
-            onSubmit={handleRegister}
+            onSubmit={handleRegisterName}
             disabled={!password}
           />
       </View>

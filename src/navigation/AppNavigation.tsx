@@ -14,6 +14,7 @@ import FeedScreen from '../pages/main-screen/FeedScreen.tsx';
 import FriendsScreen from '../pages/friends/FriendsScreen.tsx';
 import ListPhotoScreen from '../pages/main-screen/ListPhotoScreen.tsx';
 import { ChatHistory } from '../pages/chat-history/ChatHistory.tsx';
+import RegisterName from '../pages/auths/register/RegisterName.tsx';
 export type RootStackParamList = {
   ChatBox:undefined;
   HomeRegister: undefined;
@@ -21,7 +22,8 @@ export type RootStackParamList = {
   EmailLogin: undefined;
   PasswordInput: { email?: string, phone?: string };
   RegisterEmail: undefined;
-  RegisterPassword: { email: string};
+  RegisterPassword: { email: string };
+  RegisterName: { email: string, password: string};
   ProfileScreen: undefined;
   MainScreen: undefined;
   ChatHistory: undefined;
@@ -62,6 +64,7 @@ const AppNavigation: React.FC = () => {
       <Stack.Screen name="PasswordInput" component={PasswordInput} />
       <Stack.Screen name="RegisterEmail" component={RegisterEmail} />
       <Stack.Screen name="RegisterPassword" component={RegisterPassword} />
+      <Stack.Screen name="RegisterName" component={RegisterName} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="MainScreen" component={MainScreen} />
       <Stack.Screen name="FeedScreen" component={FeedScreen} />

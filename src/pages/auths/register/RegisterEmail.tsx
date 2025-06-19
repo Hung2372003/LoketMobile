@@ -3,17 +3,15 @@ import { Alert, KeyboardAvoidingView, View } from 'react-native';
 import AuthInput from '../../../component/login/AuthInput';
 import styles from '../style';
 import Submit from '../../../component/login/Submit';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../navigation/AppNavigation';
-import { useNavigation } from '@react-navigation/native';
 import ButtonBack from '../../../component/login/ButtonBack';
 
-type RegisterEmailProps = NativeStackNavigationProp<RootStackParamList, 'RegisterEmail'>;
+interface RegisterEmailProps {
+  navigation: any;
+}
 
-const RegisterEmail = () => {
+const RegisterEmail: React.FC<RegisterEmailProps> = ({navigation}) => {
 
   const [email, setEmail] = useState('');
-  const navigation = useNavigation<RegisterEmailProps>();
 
   const handleBack = () => {
     navigation.navigate('HomeRegister');
