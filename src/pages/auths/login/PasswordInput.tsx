@@ -38,9 +38,10 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      const { token, userId, title } = await authService.login(identifier, password);
+      const { token, userId ,title } = await authService.login(identifier, password);
 
       await storage.storeTokens(token);
+      await storage.storeUserId(userId);
 
       Alert.alert(title);
       navigation.navigate('MainScreen');
@@ -51,7 +52,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
   };
 
   const handleForgetPassword = () => {
-    // navigation.navigate('EmailLogin');
+
     Alert.alert("Chưa làm!!")
   };
 

@@ -88,10 +88,16 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     navigation.navigate('ChatHistory');
   };
 
+  const handleCenterPress = () => {
+    console.log('Navigate to friend');
+    navigation.navigate('FriendsScreen');
+  };
+
   const handleHistoryPress = () => {
     // TODO: Navigate to history screen
     console.log('Navigate to history');
   };
+  
 
   // Loading state
   if (isLoading) {
@@ -143,6 +149,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
         notificationCount={notificationCount}
         onProfilePress={handleProfilePress}
         onMessagePress={handleMessagePress}
+        onCenterPress={handleCenterPress}
         mode = "camera"
       />
 
