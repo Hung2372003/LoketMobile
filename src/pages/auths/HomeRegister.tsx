@@ -1,20 +1,15 @@
 import React from 'react';
 import {Image, Text, TouchableOpacity, View } from 'react-native';
 import styles from './style';
-import { RootStackParamList } from '../../navigation/AppNavigation';
-// import { StackScreenProps } from '@react-navigation/stack';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
 
-type HomeRegisterProps = NativeStackNavigationProp<RootStackParamList, 'HomeRegister'>;
+interface HomeRegisterProps {
+  navigation: any; // Replace with proper navigation type
+}
 
-const HomeRegister: React.FC = () => {
-
-  const navigation = useNavigation<HomeRegisterProps>();
+const HomeRegister: React.FC<HomeRegisterProps> = ({ navigation }) => {
 
   const handleLogin = () => {
-    navigation.navigate('PhoneLogin');
+    navigation.navigate('EmailLogin');
   };
 
   const handleRegister = () => {

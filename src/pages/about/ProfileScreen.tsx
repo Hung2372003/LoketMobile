@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,16 +9,38 @@ import {
 import ProfileHeader from '../../component/about/ProfileHeader.tsx';
 import MenuSection from '../../component/about/MenuSection.tsx';
 import { MenuSectionType } from '../../types';
+import userService from '../../services/userService.ts';
 
 const ProfileScreen: React.FC = () => {
   const [convenientMode, setConvenientMode] = useState(true);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    profileImage: '',
+    locketUrl: '',
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await userService.getMyProfile();
+        setProfileData({
+          name: profile.name,
+          profileImage: profile.avatar,
+          locketUrl: profile.email,
+        });
+      } catch (error: any) {
+        Alert.alert('Lỗi', error.message || 'Không thể tải thông tin cá nhân.');
+      }
+    };
+    fetchProfile();
+  }, []);
 
   // Mock data - thay thế bằng data thực tế
-  const profileData = {
-    name: 'Huy Phúc',
-    profileImage: 'https://via.placeholder.com/120',
-    locketUrl: 'locket.cam/nhp_2805',
-  };
+  // const profileData = {
+  //   name: 'Huy Phúc',
+  //   profileImage: 'https://via.placeholder.com/120',
+  //   locketUrl: 'locket.cam/nhp_2805',
+  // };
 
   const handleEditPhoto = () => {
     // Navigate to photo editing screen
