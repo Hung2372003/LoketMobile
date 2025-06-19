@@ -36,7 +36,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="HomeRegister" screenOptions={{
+    <Stack.Navigator initialRouteName="MainScreen" screenOptions={{
        headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',

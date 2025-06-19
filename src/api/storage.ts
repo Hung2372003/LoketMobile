@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_ID_KEY = 'userId';
 
+
 const storeTokens = async (accessToken: string ) => {
   try {
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
@@ -10,6 +11,7 @@ const storeTokens = async (accessToken: string ) => {
     console.error('Failed to store tokens', e);
   }
 };
+
 
 const storeUserId = async (userId: number) => {
   try {
@@ -28,6 +30,7 @@ const getAccessToken = async () => {
   }
 };
 
+
 const getUserId = async () => {
   try {
     return await AsyncStorage.getItem(USER_ID_KEY);
@@ -37,6 +40,15 @@ const getUserId = async () => {
   }
 };
 
+// const getRefreshToken = async () => {
+//   try {
+//     return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+//   } catch (e) {
+//     console.error('Failed to get refresh token', e);
+//     return null;
+//   }
+// };
+
 const clearTokens = async () => {
   try {
     await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -44,6 +56,7 @@ const clearTokens = async () => {
     console.error('Failed to clear tokens', e);
   }
 };
+
 
 const clearUserId = async () => {
   try {
@@ -57,9 +70,11 @@ const tokenService = {
   storeTokens,
   getAccessToken,
   clearTokens,
+
   storeUserId,
   getUserId,
   clearUserId,
+
 };
 
 export default tokenService;
