@@ -18,7 +18,7 @@ import HistorySection from '../../component/camera/HistorySection';
 import { Friend } from '../../types/camera';
 
 interface MainScreenProps {
-  navigation: any; // Replace with proper navigation type
+  navigation: any;
 }
 
 const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
@@ -59,17 +59,12 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     try {
       const photo = await takePhoto(camera);
       if (photo) {
-        // Upload photo to server
-        const uploadSuccess = await CameraService.uploadPhoto(photo);
-        if (uploadSuccess) {
-          Alert.alert(
-            'Thành công!',
-            'Ảnh đã được chụp và gửi đến bạn bè',
-            [{ text: 'OK' }]
-          );
-        } else {
-          Alert.alert('Lỗi', 'Không thể tải ảnh lên');
-        }
+        console.log('photo', photo);
+        // Navigate to preview screen instead of uploading directly
+        navigation.navigate('PhotoPreviewScreen', {
+          photoUri: photo.path || photo.uri, // Support both path and uri
+          photoPath: photo.path || photo.uri,
+        });
       }
     } catch (error) {
       console.error('Photo capture error:', error);
@@ -97,7 +92,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     // TODO: Navigate to history screen
     console.log('Navigate to history');
   };
-  
+
 
   // Loading state
   if (isLoading) {

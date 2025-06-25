@@ -1,4 +1,5 @@
 import { Photo, Friend } from '../types/camera';
+import { postService } from './postService';
 
 class CameraService {
   private mockFriends: Friend[] = [
@@ -57,6 +58,23 @@ class CameraService {
     return new Promise((resolve) => {
       setTimeout(() => resolve(true), 1500);
     });
+  }
+
+  // New method to create post using the real API
+  async createPostWithPhoto(photo: Photo, content?: string): Promise<boolean> {
+    try {
+      const postData = {
+        content: content,
+        status: 'PUBLIC',
+        file: photo,
+      };
+
+      await postService.createPost(postData);
+      return true;
+    } catch (error) {
+      console.error('Error creating post with photo:', error);
+      throw error;
+    }
   }
 }
 

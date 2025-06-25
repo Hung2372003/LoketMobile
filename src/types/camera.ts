@@ -21,4 +21,6 @@ export interface Photo {
     latitude: number;
     longitude: number;
   };
+  path: string;
+  base64?: string;
 }
