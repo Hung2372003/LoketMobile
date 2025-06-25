@@ -5,15 +5,26 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import {NativeStackNavigationProp} from 'react-native-screens/native-stack';
+import {RootStackParamList} from '../../navigation/AppNavigation.tsx';
+import {useNavigation} from '@react-navigation/native';
 
 interface HistorySectionProps {
   onHistoryPress: () => void;
 }
 
-const HistorySection: React.FC<HistorySectionProps> = ({ onHistoryPress }) => {
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'FeedScreen'>;
+
+const HistorySection: React.FC<HistorySectionProps> = () => {
+  const navigation = useNavigation<NavigationProp>();
+
+  const handleHistoryPress = () => {
+    navigation.navigate('FeedScreen');
+  }
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.historyButton} onPress={onHistoryPress}>
+      <TouchableOpacity style={styles.historyButton} onPress={handleHistoryPress}>
         <Text style={styles.historyText}>Lịch sử</Text>
         <Text style={styles.historyIcon}>⌄</Text>
       </TouchableOpacity>
