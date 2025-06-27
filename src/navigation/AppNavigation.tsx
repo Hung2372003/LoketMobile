@@ -30,7 +30,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="MainScreen" screenOptions={{
+    <Stack.Navigator initialRouteName="FriendsScreen" screenOptions={{
        headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
