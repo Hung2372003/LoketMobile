@@ -10,6 +10,7 @@ export const MessageStyles = StyleSheet.create({
   },
   time: {
     marginVertical: 17,
+    color:'#fff',
   },
   messageContainer: {
     flexDirection:'row',

@@ -18,7 +18,12 @@ import RegisterName from '../pages/auths/register/RegisterName.tsx';
 import PhotoPreviewScreen from '../pages/main-screen/PhotoPreviewScreen.tsx';
 
 export type RootStackParamList = {
-  ChatBox: undefined;
+  ChatBox: {
+    groupChatId?: number;
+    groupAvatar?:string;
+    groupName?:string;
+    listUser?: Array<number>;
+  };
   HomeRegister: undefined;
   PhoneLogin: undefined;
   EmailLogin: undefined;
@@ -43,7 +48,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="HomeRegister" screenOptions={{
+    <Stack.Navigator initialRouteName="ChatHistory" screenOptions={{
       headerShown: false,
       gestureEnabled: true,
       gestureDirection: 'horizontal',
