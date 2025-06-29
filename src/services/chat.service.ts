@@ -9,6 +9,7 @@ const api = axios.create({
   },
 });
 
+
 const getChatHistory = async () => {
     try {
         const response = await api.get('/ActionMessage/GetAllMessageGroups');
@@ -21,11 +22,11 @@ const getChatHistory = async () => {
     }
 };
 
-interface reqpestChatBox{
+interface ReqpestChatBox{
   groupChatId?:number,
   userCode?:number
 }
-const createChatBox = async (reqpestChatBox:reqpestChatBox) => {
+const createChatBox = async (reqpestChatBox:ReqpestChatBox) => {
    try {
         const response = await api.post('/ChatBox/CreateWindowChat',reqpestChatBox);
         if(response.data.error) {
@@ -36,72 +37,110 @@ const createChatBox = async (reqpestChatBox:reqpestChatBox) => {
         throw error;
     }
 };
-  const setDate = (timeData:string)=>{
-    let time = new Date(timeData);
-    let timeNow = new Date();
 
-    let differenceInMilliseconds = Math.abs(time.getTime() - timeNow.getTime());
-    let differenceInSeconds = differenceInMilliseconds / 1000;
-    let differenceInMinutes = Math.round(differenceInSeconds / 60);
-    let differenceInHour = Math.round(differenceInMinutes / 60);
-    let differenceInDay = Math.round(differenceInHour / 24);
 
-    if(differenceInSeconds < 10){
-      return 'vừa xong';
-    }
-    else if(differenceInMinutes < 60){
-      return differenceInMinutes.toString() + ' phút';
-    }
-    else if(differenceInHour < 24){
-      return differenceInHour.toString() + ' giờ';
-    }
-    else {return differenceInDay.toString() + ' Ngày';}
-  };
+export interface UpdateMessageRequestData {
+  groupChatId: number;
+  content?: string;
+  file?:Array<File>
+}
 
-  const setDateMessage = (time1:string,time2:string)=>{
-    if(!time1 && !time2){
-      return false;
-    }
-    let now = new Date();
-    let settime1 = new Date(time1);
-    let settime2 = new Date(time2);
-    if(!time2){
-       settime2 = new Date();
-    }
 
-   //điều kiện chỉ thêm giờ
-   let differenceInMilliseconds = Math.abs(settime1.getTime() - settime2.getTime());
-   let differenceInSeconds = differenceInMilliseconds / 1000;
-   let differenceInMinutes = Math.round(differenceInSeconds / 60);
+const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) => {
+  const requestUpdateMessage = new FormData();
+  requestUpdateMessage.append('groupChatId',updateMessageRequestData.groupChatId);
+  requestUpdateMessage.append('content',updateMessageRequestData.content);
+  if(updateMessageRequestData.file){
+    updateMessageRequestData.file.forEach(x => {
+      requestUpdateMessage.append('fileUpload',x);
+    });
+  }
+     try {
+        const response = await api.post('/ChatBox/UpdateMessage',requestUpdateMessage,{
+          headers:{
+             'Authorization': api.defaults.headers.Authorization,
+              'Content-Type': 'multipart/form-data',
+          },
+        });
+        if(response.data.error) {
+            throw new Error('Lỗi khi lấy thông tin profile.');
+        }
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+const setDate = (timeData: string) => {
+  const serverTime = new Date(timeData);
+  const vnTime = new Date(serverTime.getTime() + 7 * 60 * 60 * 1000); // Chuyển sang giờ Việt Nam
 
-   //Điều kiện thêm ngày
-   let differenceInDayAddDay = Math.abs(settime1.getDate() - now.getDate());
-   let differenceInMonthAddDay =  Math.abs(settime1.getMonth() - now.getMonth());
-   let differenceInYearAddDay =  Math.abs(settime1.getFullYear() - now.getFullYear());
-    if((differenceInDayAddDay > 0 || differenceInMonthAddDay > 0 || differenceInYearAddDay > 0) && differenceInMinutes > 30){
-      return 'addDay';
-    }else if(differenceInMinutes > 30){
-      return true;
-    }
-    else {
-      return false;
-    }
-  };
-  function formatDateTime(input: string | Date): string {
-  const date = new Date(input);
+  const now = new Date();
+  const differenceInMilliseconds = Math.abs(now.getTime() - vnTime.getTime());
+  const differenceInSeconds = differenceInMilliseconds / 1000;
+  const differenceInMinutes = Math.floor(differenceInSeconds / 60);
+  const differenceInHours = Math.floor(differenceInMinutes / 60);
+  const differenceInDays = Math.floor(differenceInHours / 24);
+
+  if (differenceInSeconds < 10) {
+    return 'vừa xong';
+  } else if (differenceInMinutes < 60) {
+    return `${differenceInMinutes} phút`;
+  } else if (differenceInHours < 24) {
+    return `${differenceInHours} giờ`;
+  } else {
+    return `${differenceInDays} ngày`;
+  }
+};
+
+const setDateMessage = (time1: string, time2: string) => {
+  if (!time1 && !time2) {return false;}
+
   const now = new Date();
 
-  const isSameDay = date.toDateString() === now.toDateString();
+  const date1 = new Date(new Date(time1).getTime() + 7 * 60 * 60 * 1000);
+  const date2 = time2 ? new Date(new Date(time2).getTime() + 7 * 60 * 60 * 1000) : now;
+
+  const diffMinutes = Math.abs((date1.getTime() - date2.getTime()) / 1000 / 60);
+
+  const isDifferentDay =
+    date1.getDate() !== now.getDate() ||
+    date1.getMonth() !== now.getMonth() ||
+    date1.getFullYear() !== now.getFullYear();
+
+  if (isDifferentDay && diffMinutes > 30) {
+    return 'addDay';
+  } else if (diffMinutes > 30) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+function formatDateTime(input: string | Date): string {
+  const date = new Date(input);
+
+  // Cộng thêm 7 tiếng vì server trả về giờ Mỹ (UTC-7) mà client ở Việt Nam (UTC+7)
+  const vnTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+  const now = new Date();
+
+  const isSameDay =
+    vnTime.getDate() === now.getDate() &&
+    vnTime.getMonth() === now.getMonth() &&
+    vnTime.getFullYear() === now.getFullYear();
 
   if (isSameDay) {
-    return date.toLocaleTimeString('vi-VN', {
+    return vnTime.toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit',
+      hour12: false,
     });
   } else {
-    return new Intl.DateTimeFormat('vi-VN').format(date);
+    return vnTime.toLocaleDateString('vi-VN');
   }
 }
+
+
 
 const ChatService = {
   getChatHistory,
@@ -109,6 +148,9 @@ const ChatService = {
   setDate,
   setDateMessage,
   formatDateTime,
+  updateMessage,
 };
+
 export default ChatService;
+
 
