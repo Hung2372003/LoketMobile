@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, View } from 'react-native';
 import AuthInput from '../../../component/login/AuthInput';
 import styles from '../style';
 import Option from '../../../component/login/Option';
@@ -21,6 +21,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const route = useRoute<PasswordInputRouteProps>();
   const [identifier, setIdentifier] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Lấy email hoặc phone từ route params
@@ -37,19 +38,23 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
-    try {
+    if (isLoading) return;
 
-      const { token, userId ,title } = await authService.login(identifier, password);
+    setIsLoading(true);
+    try {
+      const { token, userId } = await authService.login(identifier, password);
 
       await storage.storeTokens(token);
       await storage.storeUserId(userId);
 
 
-      Alert.alert(title);
+//      Alert.alert(title);
       navigation.navigate('MainScreen');
-
     } catch (error) {
-      Alert.alert('Đăng nhập thất bại');
+      const errorMessage = error instanceof Error ? error.message : 'Đăng nhập thất bại. Vui lòng thử lại.';
+      Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,11 +83,22 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
             onChangeMethod={handleForgetPassword}
           />
           <View style={{flex: 1}} />
+
           <Submit
             onSubmit={handleLogin}
-            disabled={!password}
+            disabled={!password || isLoading}
           />
+
+          <View style={{ height: 50 }} />
+
       </View>
+
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#ffb700" />
+        </View>
+      )}
+
     </KeyboardAvoidingView>
 
   );

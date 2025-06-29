@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_ID_KEY = 'userId';
 
-
 const storeTokens = async (accessToken: string ) => {
   try {
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
@@ -11,7 +10,6 @@ const storeTokens = async (accessToken: string ) => {
     console.error('Failed to store tokens', e);
   }
 };
-
 
 const storeUserId = async (userId: number) => {
   try {
@@ -57,7 +55,6 @@ const clearTokens = async () => {
   }
 };
 
-
 const clearUserId = async () => {
   try {
     await AsyncStorage.removeItem(USER_ID_KEY);
@@ -70,7 +67,6 @@ const tokenService = {
   storeTokens,
   getAccessToken,
   clearTokens,
-
   storeUserId,
   getUserId,
   clearUserId,
