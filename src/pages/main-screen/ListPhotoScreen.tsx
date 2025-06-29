@@ -1,24 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import PhotoGridItem from '../../component/locket-photo/PhotoGridItem';
 import FloatingCaptureButton from '../../component/locket-photo/FloatingCaptureButton';
 import TopBar from '../../component/camera/TopBar';
-
-type Photo = {
-  id: string;
-  uri: string;
-  type: string;
-};
+import { usePosts } from '../../hooks/usePosts';
+import { convertPostsToPhotos, PhotoItem, getPhotoStats } from '../../utils/photoUtils';
 
 type ListPhotoScreenProps = {
-  photos?: Photo[];
   onCapturePress?: () => void;
-  onPhotoPress?: (photo: Photo) => void;
+  onPhotoPress?: (photo: PhotoItem) => void;
   navigation: any;
 };
 
@@ -27,24 +26,24 @@ const ITEM_MARGIN = 4;
 const ITEMS_PER_ROW = 3;
 const ITEM_WIDTH = (screenWidth - (ITEM_MARGIN * (ITEMS_PER_ROW + 1))) / ITEMS_PER_ROW;
 
-const mockPhotos = [
-  { id: '1', uri: 'https://picsum.photos/300/400?random=1', type: 'image' },
-  { id: '2', uri: 'https://picsum.photos/300/400?random=2', type: 'image' },
-  { id: '3', uri: 'https://picsum.photos/300/400?random=3', type: 'image' },
-  { id: '4', uri: 'https://picsum.photos/300/400?random=4', type: 'image' },
-  { id: '5', uri: 'https://picsum.photos/300/400?random=5', type: 'image' },
-  { id: '6', uri: 'https://picsum.photos/300/400?random=6', type: 'image' },
-  { id: '7', uri: 'https://picsum.photos/300/400?random=7', type: 'image' },
-  { id: '8', uri: 'https://picsum.photos/300/400?random=8', type: 'image' },
-  { id: '9', uri: 'https://picsum.photos/300/400?random=9', type: 'image' },
-  { id: '10', uri: 'https://picsum.photos/300/400?random=10', type: 'image' },
-  { id: '11', uri: 'https://picsum.photos/300/400?random=11', type: 'image' },
-  { id: '12', uri: 'https://picsum.photos/300/400?random=12', type: 'image' },
-];
+const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
+                                                           onCapturePress,
+                                                           onPhotoPress,
+                                                           navigation
+                                                         }) => {
+  const { posts, loading, error, refreshing, refreshPosts } = usePosts();
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
+  // Convert posts to photos array
+  useEffect(() => {
+    if (posts.length > 0) {
+      const convertedPhotos = convertPostsToPhotos(posts);
+      setPhotos(convertedPhotos);
+    } else {
+      setPhotos([]);
+    }
+  }, [posts]);
 
-
-const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({photos = mockPhotos, onCapturePress, onPhotoPress, navigation}) => {
   const handleProfilePress = () => {
     navigation?.navigate('ProfileScreen');
   };
@@ -57,7 +56,16 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({photos = mockPhotos, o
     navigation?.navigate('ChatHistory');
   };
 
+  const handlePhotoPress = (photo: PhotoItem) => {
+    console.log('Photo pressed:', photo);
+    onPhotoPress?.(photo);
+  };
+
   const renderPhotoGrid = () => {
+    if (photos.length === 0) {
+      return null;
+    }
+
     const rows = [];
     for (let i = 0; i < photos.length; i += ITEMS_PER_ROW) {
       const rowItems = photos.slice(i, i + ITEMS_PER_ROW);
@@ -68,7 +76,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({photos = mockPhotos, o
               key={photo.id}
               photo={photo}
               width={ITEM_WIDTH}
-              onPress={() => onPhotoPress?.(photo)}
+              onPress={() => handlePhotoPress(photo)}
               style={[
                 styles.gridItem,
                 index > 0 && styles.gridItemWithMargin,
@@ -76,33 +84,105 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({photos = mockPhotos, o
             />
           ))}
           {/* Fill empty space if row is not complete */}
-          {rowItems.length < ITEMS_PER_ROW && (
-            <View style={[styles.emptyItem, { width: ITEM_WIDTH }]} />
-          )}
+          {rowItems.length < ITEMS_PER_ROW &&
+            Array.from({ length: ITEMS_PER_ROW - rowItems.length }).map((_, emptyIndex) => (
+              <View
+                key={`empty-${i}-${emptyIndex}`}
+                style={[
+                  styles.emptyItem,
+                  { width: ITEM_WIDTH },
+                  emptyIndex === 0 && rowItems.length > 0 && styles.gridItemWithMargin
+                ]}
+              />
+            ))
+          }
         </View>
       );
     }
     return rows;
   };
 
-  return (
-    <View style={styles.container}>
-      <TopBar
-          centerText="Tất cả bạn bè"
-          showDropdown={true}
-          notificationCount={3}
-          onProfilePress={handleProfilePress}
-          onCenterPress={handleCenterPress}
-          onMessagePress={handleMessagePress}
-          mode="feed"
-      />
+  const renderLoadingState = () => (
+    <View style={styles.centerContainer}>
+      <ActivityIndicator size="large" color="#FFD700" />
+      <Text style={styles.loadingText}>Đang tải ảnh...</Text>
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.centerContainer}>
+      <Text style={styles.emptyIcon}>📷</Text>
+      <Text style={styles.emptyTitle}>Chưa có ảnh nào</Text>
+      <Text style={styles.emptyDescription}>
+        Các ảnh từ bài viết sẽ hiển thị ở đây
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={refreshPosts}>
+        <Text style={styles.retryButtonText}>Làm mới</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderErrorState = () => (
+    <View style={styles.centerContainer}>
+      <Text style={styles.errorIcon}>⚠️</Text>
+      <Text style={styles.errorTitle}>Có lỗi xảy ra</Text>
+      <Text style={styles.errorDescription}>{error}</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={refreshPosts}>
+        <Text style={styles.retryButtonText}>Thử lại</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderContent = () => {
+    if (loading && photos.length === 0) {
+      return renderLoadingState();
+    }
+
+    if (error && photos.length === 0) {
+      return renderErrorState();
+    }
+
+    if (photos.length === 0) {
+      return renderEmptyState();
+    }
+
+    return (
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshPosts}
+            tintColor="#FFD700"
+            colors={['#FFD700']}
+          />
+        }
       >
+        <View style={styles.photoCountContainer}>
+          <Text style={styles.photoCountText}>
+            {photos.length} ảnh{photos.length > 0 && ` từ ${getPhotoStats(photos).uniquePosts} bài viết`}
+          </Text>
+        </View>
         {renderPhotoGrid()}
       </ScrollView>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <TopBar
+        centerText="Tất cả ảnh"
+        showDropdown={false}
+        notificationCount={3}
+        onProfilePress={handleProfilePress}
+        onCenterPress={handleCenterPress}
+        onMessagePress={handleMessagePress}
+        mode="feed"
+      />
+
+      {renderContent()}
 
       <FloatingCaptureButton onPress={onCapturePress} />
     </View>
@@ -120,7 +200,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: ITEM_MARGIN,
     paddingBottom: 100,
-    paddingTop: 150,
+    paddingTop: 20,
   },
   row: {
     flexDirection: 'row',
@@ -134,6 +214,93 @@ const styles = StyleSheet.create({
   },
   emptyItem: {
     flex: 1,
+  },
+  // Photo count
+  photoCountContainer: {
+    marginTop: ITEM_MARGIN,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  photoCountText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.8,
+  },
+  // Loading, Empty, and Error States
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingBottom: 100, // Account for floating button
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 15,
+    opacity: 0.8,
+  },
+  // Empty State
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    color: '#fff',
+    fontSize: 16,
+    opacity: 0.7,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 30,
+  },
+  // Error State
+  errorIcon: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  errorTitle: {
+    color: '#ff6b6b',
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  errorDescription: {
+    color: '#ff6b6b',
+    fontSize: 16,
+    opacity: 0.8,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 30,
+  },
+  // Retry Button
+  retryButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+    elevation: 3,
+    shadowColor: '#FFD700',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  retryButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

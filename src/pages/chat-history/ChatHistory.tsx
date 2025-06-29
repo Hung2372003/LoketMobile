@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { PreviewCard } from '../../component/preview-card/preview-card.component';
 import { PreviewCardTheme } from '../../component/preview-card/preview-card.theme.interface';
@@ -6,33 +6,60 @@ import Feather from '@react-native-vector-icons/feather';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
 import { useNavigation } from '@react-navigation/native';
+import ChatService from '../../services/chat.service';
+
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
+interface ListUser {
+    userCode:number,
+    name:string,
+    avatar:string,
+}
 interface Message {
-  id: string;
-  name: string;
-  message: string;
-  time?: string;
-  avatar: string;
+  groupChatId: number;
+  groupName: string;
+  groupAvatar: string;
+  status?: boolean;
+  listUser:Array<ListUser>,
+  newMessage:{
+    id:number,
+    content:string,
+    createdBy:number,
+    createdTime:string,
+  }
 }
 
-const messages: Message[] = [
-  { id: '1', name: 'Huy Phúc', message: 'Cơ mà phản hồi kiểu này thì nó sàgsjfgjhsdgfjshdfgjshdfgjsdhfgjsdhfgsjhfgyausdtuastuvẫn...', time: '2d', avatar: 'https://picsum.photos/id/1015/300/200' },
-  { id: '2', name: 'Chi Chi', message: 'Chưa có câu trả lời nào!', time: '2d',avatar: 'https://picsum.photos/id/1016/300/200' },
-  { id: '3', name: 'Thanh Trí', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1020/300/200' },
-  { id: '4', name: 'Thùy Nguyễn', message: 'Chưa có câu trả lời nào!', time: '2d',avatar: 'https://picsum.photos/id/1024/300/200' },
-  { id: '5', name: 'Viet N', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1035/300/200' },
-  { id: '6', name: 'Vũ Đông', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1041/300/200' },
-  { id: '7', name: '💖 tnguynn🐳', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1050/300/200' },
-  { id: '8', name: 'Công Anh', message: 'Chưa có câu trả lời nào!', time: '2d',avatar: 'https://picsum.photos/id/1050/300/200' },
-    { id: '9', name: '💖 tnguynn🐳', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1050/300/200' },
-  { id: '38', name: 'Công Anh', message: 'Chưa có câu trả lời nào!', time: '2d',avatar: 'https://picsum.photos/id/1050/300/200' },
-    { id: '37', name: '💖 tnguynn🐳', message: 'Chưa có câu trả lời nào!',time: '2d', avatar: 'https://picsum.photos/id/1050/300/200' },
-  { id: '86', name: 'Công Anh', message: 'Chưa có câu trả lời nào!', time: '2d',avatar: 'https://picsum.photos/id/1050/300/200' },
-];
-
 export const ChatHistory: React.FC = () => {
-   const navigation = useNavigation<ChatHistoryNavigationProp>();
 
+  const navigation = useNavigation<ChatHistoryNavigationProp>();
+  const [message, setMessage] = useState<Array<Message>>([]); // bạn nên định nghĩa rõ type cho message nếu có
+
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      try {
+        console.log('Gọi API getChatHistory...');
+        const data = await ChatService.getChatHistory();
+        console.log('Dữ liệu chat:', data);
+        setMessage(data);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+
+    fetchChatHistory();
+  }, []);
+
+  const goToChat = (groupChatId:number,groupAvatar:string,groupName:string,listUser:Array<ListUser>)=>{
+    const newList:Array<number> = [];
+    listUser.forEach(x => {
+      newList.push(x.userCode);
+    });
+     navigation.navigate('ChatBox', {
+      groupChatId:groupChatId,
+      groupAvatar:groupAvatar,
+      groupName:groupName,
+      listUser:newList,
+    });
+  };
   const previewCardTheme: PreviewCardTheme = {
     avatarSize:60,
   };
@@ -45,18 +72,19 @@ export const ChatHistory: React.FC = () => {
           <Text style={[styles.text]}>Tin Nhắn</Text>
       </View>
       <FlatList
-        data={messages}
-        keyExtractor={item => item.id}
+        data={message}
+        keyExtractor={item => item.groupChatId.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
+          onPress={ () => goToChat(item.groupChatId,item.groupAvatar,item.groupName,item.listUser)}
             style={styles.card}
           >
             <PreviewCard
-              avatar={item.avatar}
-              title={item.name}
-              content={item.message}
-              isRead={true}
-              time={item.time}
+              avatar={item.groupAvatar}
+              title={item.groupName}
+              content={item.newMessage.content}
+              isRead={item.status}
+              time={ChatService.setDate(item.newMessage.createdTime)}
               theme={previewCardTheme}
              />
           </TouchableOpacity>
