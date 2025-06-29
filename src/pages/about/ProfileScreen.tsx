@@ -1,46 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import ProfileHeader from '../../component/about/ProfileHeader.tsx';
 import MenuSection from '../../component/about/MenuSection.tsx';
 import { MenuSectionType } from '../../types';
 import userService from '../../services/userService.ts';
+import { Profile } from '../../types/profile.ts';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen: React.FC = () => {
   const [convenientMode, setConvenientMode] = useState(true);
-  const [profileData, setProfileData] = useState({
-    name: '',
-    profileImage: '',
-    locketUrl: '',
-  });
+  const [profileData, setProfileData] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profile = await userService.getMyProfile();
-        setProfileData({
-          name: profile.name,
-          profileImage: profile.avatar,
-          locketUrl: profile.email,
-        });
-      } catch (error: any) {
-        Alert.alert('Lỗi', error.message || 'Không thể tải thông tin cá nhân.');
-      }
-    };
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const profileFromApi = await userService.getMyProfile();
 
-  // Mock data - thay thế bằng data thực tế
-  // const profileData = {
-  //   name: 'Huy Phúc',
-  //   profileImage: 'https://via.placeholder.com/120',
-  //   locketUrl: 'locket.cam/nhp_2805',
-  // };
+          if (profileFromApi) {
+            const mappedProfile: Profile = {
+              name: profileFromApi.name,
+              profileImage: profileFromApi.avatar,
+              locketUrl: profileFromApi.email,
+            };
+            setProfileData(mappedProfile);
+          } else {
+            throw new Error('Không nhận được dữ liệu profile.');
+          }
+
+        } catch (error: any) {
+          Alert.alert('Lỗi', error.message || 'Không thể tải thông tin cá nhân.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      setIsLoading(true);
+      fetchProfile();
+    }, [])
+  );
 
   const handleEditPhoto = () => {
     // Navigate to photo editing screen
@@ -214,6 +220,15 @@ const ProfileScreen: React.FC = () => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <ActivityIndicator size="large" color="#ffb700" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -221,13 +236,15 @@ const ProfileScreen: React.FC = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileHeader
-          name={profileData.name}
-          profileImage={profileData.profileImage}
-          locketUrl={profileData.locketUrl}
-          onEditPhoto={handleEditPhoto}
-          onShareLocket={handleShareLocket}
-        />
+        {profileData && (
+          <ProfileHeader
+            name={profileData.name}
+            profileImage={profileData.profileImage}
+            locketUrl={profileData.locketUrl}
+            onEditPhoto={handleEditPhoto}
+            onShareLocket={handleShareLocket}
+          />
+        )}
 
         {menuSections.map((section, index) => (
           <MenuSection
@@ -253,6 +270,10 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 50,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

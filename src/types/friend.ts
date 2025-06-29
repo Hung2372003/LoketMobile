@@ -1,8 +1,8 @@
-// src/types/friend.ts
+
 export interface Friend {
-  id: string;
+  id: number;
   name: string;
-  avatar: string; // Hoặc string nếu là URL, hoặc ImageSourcePropType từ 'react-native'
+  avatar: string;
 }
 
 export interface AppLinkData {
@@ -10,5 +10,5 @@ export interface AppLinkData {
   appName: string;
   iconColor?: string;
   isImage?: boolean;
-  imageSource?: any; // ImageSourcePropType
+  imageSource?: any;
 };
