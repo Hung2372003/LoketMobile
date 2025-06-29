@@ -28,6 +28,7 @@ const getAccessToken = async () => {
   }
 };
 
+
 const getUserId = async () => {
   try {
     return await AsyncStorage.getItem(USER_ID_KEY);
@@ -36,6 +37,15 @@ const getUserId = async () => {
     return null;
   }
 };
+
+// const getRefreshToken = async () => {
+//   try {
+//     return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+//   } catch (e) {
+//     console.error('Failed to get refresh token', e);
+//     return null;
+//   }
+// };
 
 const clearTokens = async () => {
   try {

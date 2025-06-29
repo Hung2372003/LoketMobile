@@ -8,48 +8,30 @@ import {
   Text,
   TouchableOpacity,
   SafeAreaView,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import TopBar from '../../component/camera/TopBar';
+import { usePosts } from '../../hooks/usePosts';
+import { convertPostsToFeedItems, FeedItem } from '../../utils/postUtils';
 
 const { width, height } = Dimensions.get('window');
-type User = {
-  name: string;
-  avatar: string;
-}
-type FeedItem = {
-  id: string;
-  user: User;
-  image: string;
-  timestamp: string;
-  caption?: string;
-}
+
 type FeedScreenProps = {
   navigation: any;
 }
 
 const FeedScreen = ({ navigation } : FeedScreenProps) => {
-  const [feedData, setFeedData] = useState([
-    {
-      id: '1',
-      user: {
-        name: 'Bạn A',
-        avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE',
-      },
-      image: 'https://fifthsun.com/cdn/shop/files/19NNTD00461A-033-Link-Avatar-Color-148-147-swatch_1024x.jpg?v=1713863654',
-      timestamp: 'May 18, 2025',
-      caption: 'muốn lấy vợ thế nhi 🤡',
-    },
-    // {
-    //   id: '2',
-    //   user: {
-    //     name: 'Bạn B',
-    //     avatar: 'https://via.placeholder.com/40',
-    //   },
-    //   image: 'https://via.placeholder.com/400x600',
-    //   timestamp: 'May 17, 2025',
-    //   caption: 'Ngày đẹp trời ☀️',
-    // },
-  ]);
+  const { posts, loading, error, refreshing, refreshPosts } = usePosts();
+  const [feedData, setFeedData] = useState<FeedItem[]>([]);
+
+  // Convert API data to feed items
+  React.useEffect(() => {
+    if (posts.length > 0) {
+      const convertedData = convertPostsToFeedItems(posts);
+      setFeedData(convertedData);
+    }
+  }, [posts]);
 
   const handleProfilePress = () => {
     navigation?.navigate('ProfileScreen');
@@ -67,7 +49,13 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
     <View style={styles.feedItem}>
       {/* Main image container with rounded corners */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: item.image }} style={styles.feedImage} />
+        <Image
+          source={{ uri: item.image }}
+          style={styles.feedImage}
+          onError={(error) => {
+            console.log('Image load error:', error.nativeEvent.error);
+          }}
+        />
 
         {item.caption && (
           <View style={styles.captionOverlay}>
@@ -77,13 +65,18 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
       </View>
 
       <View style={styles.userInfoContainer}>
-        <Image source={{ uri: item.user.avatar }} style={styles.userAvatar} />
+        <Image
+          source={{ uri: item.user.avatar }}
+          style={styles.userAvatar}
+          onError={(error) => {
+            console.log('Avatar load error:', error.nativeEvent.error);
+          }}
+        />
         <View style={styles.userTextInfo}>
           <Text style={styles.userName}>{item.user.name}</Text>
           <Text style={styles.timestamp}>{item.timestamp}</Text>
         </View>
       </View>
-
 
       {/* Message input area */}
       <View style={styles.messageInputArea}>
@@ -106,6 +99,44 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
     </View>
   );
 
+  const renderEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>Chưa có bài viết nào</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={refreshPosts}>
+        <Text style={styles.retryButtonText}>Thử lại</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderErrorComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.errorText}>Có lỗi xảy ra: {error}</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={refreshPosts}>
+        <Text style={styles.retryButtonText}>Thử lại</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (loading && feedData.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <TopBar
+          centerText="Tất cả bạn bè"
+          showDropdown={true}
+          notificationCount={3}
+          onProfilePress={handleProfilePress}
+          onCenterPress={handleCenterPress}
+          onMessagePress={handleMessagePress}
+          mode="feed"
+        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Đang tải...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <TopBar
@@ -127,12 +158,21 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
         snapToInterval={height - 200}
         decelerationRate="fast"
         style={styles.feedList}
-        contentContainerStyle={styles.feedListContainer}
+        contentContainerStyle={feedData.length === 0 ? styles.emptyContentContainer : styles.feedListContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshPosts}
+            tintColor="#FFD700"
+            colors={['#FFD700']}
+          />
+        }
+        ListEmptyComponent={error ? renderErrorComponent : renderEmptyComponent}
       />
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('ListPhotoScreen')}>
           <View style={styles.gridIcon}>
             <View style={[styles.dot, styles.topLeft]} />
             <View style={[styles.dot, styles.topRight]} />
@@ -168,9 +208,13 @@ const styles = StyleSheet.create({
   feedListContainer: {
     paddingBottom: 100, // Space for bottom nav
   },
+  emptyContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 100,
+  },
   feedItem: {
     width: width,
-    height: height - 200, // Space for topbar and bottom nav
+    height: height - 80, // Space for topbar and bottom nav
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
@@ -232,7 +276,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 2,
   },
-
   timestamp: {
     color: '#666',
     fontSize: 14,
@@ -284,6 +327,46 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 26,
+  },
+  // Loading and Error States
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  retryButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
   },
   // Bottom Navigation Styles
   bottomNav: {
@@ -337,7 +420,6 @@ const styles = StyleSheet.create({
   topRight: { top: 0, right: 0 },
   bottomLeft: { bottom: 0, left: 0 },
   bottomRight: { bottom: 0, right: 0 },
-  // More icon (3 dots)
   moreIcon: {
     flexDirection: 'row',
     alignItems: 'center',
