@@ -45,7 +45,7 @@ const flatListRef = useRef<FlatList>(null);
       const addMessage: MessageType = {
         id: parseInt(messIdString, 36) || Date.now(),
         content,
-        createdTime: new Date().toString(),
+        createdTime: new Date(Date.now() - 7 * 60 * 60 * 1000).toString(),
         createdBy: parseInt(userCode, 36),
         listFile: safeListFile,
       };
