@@ -10,47 +10,50 @@ import {
 import ProfileHeader from '../../component/about/ProfileHeader.tsx';
 import MenuSection from '../../component/about/MenuSection.tsx';
 import { MenuSectionType } from '../../types';
-import userService from '../../services/userService.ts';
-import { Profile } from '../../types/profile.ts';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store'; // Giả sử store ở thư mục redux
+import { fetchProfile, uploadAvatar } from '../../redux/profileSlice'; // Import các actions
+import { launchImageLibrary } from 'react-native-image-picker'; // Thư viện chọn ảnh cho RN CLI
+import { Text } from 'react-native-gesture-handler';
 
 const ProfileScreen: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Lấy dữ liệu và trạng thái từ Redux store
+  const { data: profileData, status, error, isUploadingAvatar } = useSelector((state: RootState) => state.profile);
+
+  // Vẫn dùng useState cho các state chỉ thuộc về giao diện của màn hình này
   const [convenientMode, setConvenientMode] = useState(true);
-  const [profileData, setProfileData] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
-      const fetchProfile = async () => {
-        try {
-          const profileFromApi = await userService.getMyProfile();
-
-          if (profileFromApi) {
-            const mappedProfile: Profile = {
-              name: profileFromApi.name,
-              profileImage: profileFromApi.avatar,
-              locketUrl: profileFromApi.email,
-            };
-            setProfileData(mappedProfile);
-          } else {
-            throw new Error('Không nhận được dữ liệu profile.');
-          }
-
-        } catch (error: any) {
-          Alert.alert('Lỗi', error.message || 'Không thể tải thông tin cá nhân.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      setIsLoading(true);
-      fetchProfile();
-    }, [])
+      // Chỉ gọi API để fetch profile nếu trạng thái là 'idle' (chưa được tải lần nào)
+      // hoặc 'failed' (lần tải trước bị lỗi) để thử lại.
+      if (status === 'idle' || status === 'failed') {
+        dispatch(fetchProfile());
+      }
+    }, [status, dispatch])
   );
 
+  // --- BƯỚC 4: TRIỂN KHAI HÀM `handleEditPhoto` ĐỂ UPLOAD AVATAR ---
   const handleEditPhoto = () => {
-    // Navigate to photo editing screen
-    console.log('Edit photo pressed');
+    launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.8,
+    }, (response) => {
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+            Alert.alert('Lỗi', response.errorMessage || 'Không thể chọn ảnh');
+        } else if (response.assets && response.assets[0].uri) {
+            const imageUri = response.assets[0].uri;
+            // Dispatch action `uploadAvatar` với URI của ảnh đã chọn
+            dispatch(uploadAvatar(imageUri))
+                .unwrap() // .unwrap() giúp bắt lỗi từ createAsyncThunk
+                .catch(err => Alert.alert('Lỗi', err.message || 'Cập nhật ảnh thất bại.'));
+        }
+    });
   };
 
   const handleShareLocket = () => {
@@ -220,7 +223,7 @@ const ProfileScreen: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
+  if (status === 'idle' || status === 'loading') {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -228,6 +231,20 @@ const ProfileScreen: React.FC = () => {
       </View>
     );
   }
+  
+  // Hiển thị lỗi nếu fetch thất bại
+  if (status === 'failed') {
+      return <View style={styles.container}><Text style={styles.errorText}>Lỗi: {error}</Text></View>
+  }
+
+  // if (isLoading) {
+  //   return (
+  //     <View style={[styles.container, styles.centerContent]}>
+  //       <StatusBar barStyle="light-content" backgroundColor="#000000" />
+  //       <ActivityIndicator size="large" color="#ffb700" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -243,6 +260,7 @@ const ProfileScreen: React.FC = () => {
             locketUrl={profileData.locketUrl}
             onEditPhoto={handleEditPhoto}
             onShareLocket={handleShareLocket}
+            isUploading={isUploadingAvatar}
           />
         )}
 
@@ -274,6 +292,11 @@ const styles = StyleSheet.create({
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: '50%'
   },
 });
 

@@ -25,6 +25,9 @@ import {postService} from '../../services/postService.ts';
 import authService from '../../services/authService.ts';
 import storage from '../../api/storage.ts';
 const { width, height } = Dimensions.get('window');
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchProfile } from '../../redux/profileSlice';
 
 type FeedScreenProps = {
   navigation: any;
@@ -49,6 +52,8 @@ type FeedScreenRouteParams = {
 const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -72,6 +77,11 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     }
   }, [posts]);
 
+  React.useEffect(() => {
+    if (profileStatus === 'idle') {
+      dispatch(fetchProfile());
+    }
+  }, [profileStatus, dispatch]);
   // Handle navigation params khi component mount
   useEffect(() => {
     if (selectedPhotoId && feedData.length > 0 && pagerRef.current) {
@@ -330,6 +340,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           onCenterPress={handleCenterPress}
           onMessagePress={handleMessagePress}
           mode="feed"
+          profileImage={profileData?.profileImage}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFD700" />
@@ -360,6 +371,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         onCenterPress={handleCenterPress}
         onMessagePress={handleMessagePress}
         mode="feed"
+        profileImage={profileData?.profileImage}
       />
 
       <PagerView

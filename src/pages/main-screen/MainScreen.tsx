@@ -16,6 +16,9 @@ import TopBar from '../../component/camera/TopBar';
 import CameraControls from '../../component/camera/CameraControls';
 import HistorySection from '../../component/camera/HistorySection';
 import { Friend } from '../../types/camera';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchProfile } from '../../redux/profileSlice';
 
 interface MainScreenProps {
   navigation: any;
@@ -26,6 +29,10 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
   const devices = useCameraDevices();
   const { cameraState, isLoading, toggleCamera, toggleFlash, takePhoto } = useCamera();
 
+  const dispatch = useDispatch<AppDispatch>();
+  // Lấy dữ liệu profile và trạng thái fetch từ store
+  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
+
   const [friends, setFriends] = useState<Friend[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isPhotoLoading, setIsPhotoLoading] = useState(false);
@@ -35,8 +42,11 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     : devices.find(d => d.position === 'back');
 
   useEffect(() => {
+    if (profileStatus === 'idle') {
+      dispatch(fetchProfile());
+    }
     loadInitialData();
-  }, []);
+  }, [profileStatus, dispatch]);
 
   const loadInitialData = async () => {
     try {
@@ -147,6 +157,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
         onMessagePress={handleMessagePress}
         onCenterPress={handleCenterPress}
         mode = "camera"
+        profileImage={profileData?.profileImage}
       />
 
       <CameraControls
