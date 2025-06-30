@@ -17,12 +17,6 @@ import TopBar from '../../component/camera/TopBar';
 import FeedOptionsModal from './FeedOptionsModal';
 import { usePosts } from '../../hooks/usePosts';
 import { convertPostsToFeedItems, FeedItem } from '../../utils/postUtils';
-<<<<<<< HEAD
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
-import { fetchProfile } from '../../redux/profileSlice';
-
-=======
 import RNFS from 'react-native-fs';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -30,8 +24,10 @@ import {useRoute, RouteProp} from '@react-navigation/native';
 import {postService} from '../../services/postService.ts';
 import authService from '../../services/authService.ts';
 import storage from '../../api/storage.ts';
->>>>>>> main
 const { width, height } = Dimensions.get('window');
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchProfile } from '../../redux/profileSlice';
 
 type FeedScreenProps = {
   navigation: any;
@@ -56,10 +52,8 @@ type FeedScreenRouteParams = {
 const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
-<<<<<<< HEAD
   const dispatch = useDispatch<AppDispatch>();
   const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
-=======
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -67,7 +61,6 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const pagerRef = useRef<PagerView>(null);
   const routePhoto = useRoute<RouteProp<Record<string, FeedScreenRouteParams>, string>>();
   const { selectedPhotoId } = routePhoto.params ?? {};
->>>>>>> main
 
   const selectedIndex = feedData.findIndex(feedItem => feedItem.id === selectedPhotoId);
 
@@ -84,13 +77,11 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     }
   }, [posts]);
 
-<<<<<<< HEAD
   React.useEffect(() => {
     if (profileStatus === 'idle') {
       dispatch(fetchProfile());
     }
   }, [profileStatus, dispatch]);
-=======
   // Handle navigation params khi component mount
   useEffect(() => {
     if (selectedPhotoId && feedData.length > 0 && pagerRef.current) {
@@ -183,7 +174,6 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
       }).start();
     }
   }, [showPopup]);
->>>>>>> main
 
   const handleProfilePress = () => {
     navigation?.navigate('ProfileScreen');

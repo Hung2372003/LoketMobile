@@ -13,14 +13,10 @@ import {
 import PhotoGridItem from '../../component/locket-photo/PhotoGridItem';
 import TopBar from '../../component/camera/TopBar';
 import { usePosts } from '../../hooks/usePosts';
-<<<<<<< HEAD
 import { convertPostsToPhotos, PhotoItem, getPhotoStats } from '../../utils/photoUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
-=======
-import { convertPostsToPhotos, PhotoItem } from '../../utils/photoUtils';
->>>>>>> main
 
 type ListPhotoScreenProps = {
   onCapturePress?: () => void;
