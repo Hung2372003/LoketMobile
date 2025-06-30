@@ -48,7 +48,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="ChatHistory" screenOptions={{
+    <Stack.Navigator initialRouteName="FeedScreen" screenOptions={{
       headerShown: false,
       gestureEnabled: true,
       gestureDirection: 'horizontal',

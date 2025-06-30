@@ -4,6 +4,7 @@ import { Post } from '../services/postService';
 export interface FeedItem {
   id: string;
   user: {
+    id: number;
     name: string;
     avatar: string;
   };
@@ -45,6 +46,7 @@ export const convertPostsToFeedItems = (posts: Post[]): FeedItem[] => {
     .map(post => ({
       id: post.id.toString(),
       user: {
+        id: post.createdBy,
         name: post.name,
         avatar: post.avatar,
       },
