@@ -3,6 +3,7 @@ export const colors = {
   background: '#242424',
   surface: '#2C2C2E', // Nền cho card, input
   primaryText: '#FFFFFF',
+  primary: '#ffb700',
   secondaryText: '#AEAEB2',
   tertiaryText: '#8E8E93',
   accent: '#0A84FF', // Một màu nhấn (ví dụ)

@@ -2,20 +2,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Feather from '@react-native-vector-icons/feather';
-import { Friend } from '../../types/friend'; // Import type
 
-interface FriendItemProps extends Friend {
-  onRemove: (id: string) => void;
+interface FriendItemProps {
+  id: string;
+  avatar: string;
+  name: string;
+  onRemove?: (id: string) => void; // `onRemove` là tùy chọn
+  children?: React.ReactNode;
 }
 
-const FriendItem: React.FC<FriendItemProps> = ({ id, avatar, name, onRemove }) => {
+const FriendItem: React.FC<FriendItemProps> = ({ id, avatar, name, onRemove, children }) => {
   return (
     <View style={styles.friendItem}>
       <Image source={{uri: avatar}} style={styles.friendAvatar} />
       <Text style={styles.friendName}>{name}</Text>
-      <TouchableOpacity onPress={() => onRemove(id)} style={styles.removeButton}>
-        <Feather name="x" size={24} color="#A0A0A0" />
-      </TouchableOpacity>
+      {children ? (
+        <View style={styles.actionsContainer}>
+            {children}
+        </View>
+      ) : (
+        // Nếu không, hãy render nút "Xóa" mặc định (chỉ khi có hàm onRemove)
+        onRemove && (
+          <TouchableOpacity onPress={() => onRemove(id)} style={styles.removeButton}>
+            <Feather name="x" size={24} color="#A0A0A0" />
+          </TouchableOpacity>
+        )
+      )}
     </View>
   );
 };
@@ -44,6 +56,10 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 8,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 

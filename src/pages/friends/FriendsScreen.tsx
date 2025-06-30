@@ -10,11 +10,12 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import FriendItem from '../../component/friends/FriendItem';
 import AppLink from '../../component/friends/AppLink';
 import SearchBarFriends from '../../component/friends/SearchBarFriends';
-import { Friend, AppLinkData } from '../../types/friend';
+import { Friend, AppLinkData, FriendRequest, SearchResult } from '../../types/friend';
 import { colors, typography, spacing } from './friend.style';
 import { useFocusEffect} from '@react-navigation/native';
 import friendService from '../../services/friendService';
@@ -41,18 +42,27 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
   const pan = useRef(new Animated.ValueXY()).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const [isAtTop, setIsAtTop] = useState(true);
+
   const [searchText, setSearchText] = useState('');
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const searchTimer = useRef<NodeJS.Timeout | null>(null)
 
   useFocusEffect(
     useCallback(() => {
-      const fetchFriends = async () => {
+      const fetchInitialData = async () => {
         try {
           setIsLoading(true);
           setError(null);
-          const friendsFromApi = await friendService.getFriends();
+          const [friendsFromApi, requestsFromApi] = await Promise.all([
+            friendService.getFriends(),
+            friendService.getFriendRequests(),
+          ]);
 
           // Map dữ liệu từ API sang
           const mappedFriends: Friend[] = friendsFromApi.map((friend: any) => ({
@@ -60,19 +70,18 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
             name: friend.name,
             avatar: friend.path,
           }));
+          setFriendRequests(requestsFromApi.map((r: any) => ({ id: String(r.userCode), name: r.name, avatar: r.avatar })));
 
           setFriends(mappedFriends);
 
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Lỗi không xác định';
-          setError(errorMessage);
-          Alert.alert('Lỗi', errorMessage);
+        } catch (err: any) {
+          setError(err.message || 'Lỗi không xác định');
         } finally {
           setIsLoading(false);
         }
       };
 
-      fetchFriends();
+      fetchInitialData();
 
       // Reset lại vị trí và độ mờ của màn hình ngay lập tức
       pan.setValue({ x: 0, y: 0 });
@@ -139,9 +148,102 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
     setIsAtTop(event.nativeEvent.contentOffset.y === 0);
   };
 
-  const handleRemoveFriend = (id: string) => {
-    console.log('Remove friend with id:', id);
-    // Thêm logic xóa
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (searchTimer.current) {
+      clearTimeout(searchTimer.current);
+    }
+    if (text.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const resultsFromApi = await friendService.searchFriends(text);
+
+        // Hàm helper để "dịch" status từ API
+        const mapApiStatusToLocalStatus = (apiStatus: string): SearchResult['status'] => {
+          switch (apiStatus) {
+            case 'ALREADY_FRIENDS':
+              return 'is_friend';
+            case 'WAITING_FRIENDED':
+              return 'pending';
+            default:
+              return 'not_friend';
+          }
+        };
+
+        // Map dữ liệu từ API, sử dụng status trả về
+        const mappedResults: SearchResult[] = resultsFromApi.map((r: any) => ({
+          id: String(r.id),
+          name: r.name,
+          avatar: r.avatar,
+          status: mapApiStatusToLocalStatus(r.status), // <-- Sử dụng status thật từ API
+        }));
+
+        setSearchResults(mappedResults);
+      } catch (err: any) {
+        Alert.alert('Lỗi tìm kiếm', err.message);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500); // Chờ 500ms sau khi người dùng ngừng gõ
+  };
+
+  // --- ACTION HANDLERS ---
+  const handleSendRequest = async (userId: string) => {
+    try {
+      await friendService.sendFriendRequest(Number(userId));
+      Alert.alert('Thành công', 'Đã gửi lời mời kết bạn.');
+      // Cập nhật UI để hiển thị trạng thái "Đã gửi"
+      setSearchResults(prev => prev.map(user => user.id === userId ? { ...user, status: 'pending' } : user));
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message);
+    }
+  };
+
+  const handleAcceptRequest = async (request: FriendRequest) => {
+    try {
+      await friendService.acceptFriendRequest(Number(request.id));
+      // Cập nhật UI ngay lập tức
+      setFriendRequests(prev => prev.filter(r => r.id !== request.id));
+      setFriends(prev => [...prev, { id: request.id, name: request.name, avatar: request.avatar }]);
+      Alert.alert('Thành công', `Bạn và ${request.name} đã trở thành bạn bè.`);
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message);
+    }
+  };
+
+  const handleRemoveFriend = (friendId: string) => {
+    const friendToRemove = friends.find(f => f.id === friendId);
+    if (!friendToRemove) return;
+
+    Alert.alert(
+      'Xóa bạn', 
+      `Bạn có chắc chắn muốn xóa ${friendToRemove.name} khỏi danh sách bạn bè không?`, // Nội dung
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel', 
+        },
+        {
+          text: 'Xóa',
+          onPress: async () => {
+            try {
+              await friendService.removeFriend(Number(friendId));
+
+              setFriends(prevFriends => prevFriends.filter(friend => friend.id !== friendId));
+
+            } catch (err: any) {
+              Alert.alert('Lỗi', err.message || 'Không thể xóa bạn bè vào lúc này.');
+            }
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true } // Cho phép đóng hộp thoại bằng cách nhấn ra ngoài
+    );
   };
 
   const renderContent = () => {
@@ -152,8 +254,68 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
       return <Text style={styles.errorText}>Lỗi: {error}</Text>;
     }
 
+    if (searchText.trim() !== '') {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Kết quả tìm kiếm</Text>
+          {isSearching && <ActivityIndicator color={colors.primaryText} />}
+          {!isSearching && searchResults.length === 0 && <Text style={styles.infoText}>Không tìm thấy ai.</Text>}
+          {searchResults.map(user => {
+
+            let actionButton;
+            switch (user.status) {
+              case 'is_friend':
+                actionButton = (
+                  <View style={[styles.actionButton, styles.friendButton]}>
+                    <Text style={styles.friendButtonText}>Bạn bè</Text>
+                  </View>
+                );
+                break;
+              case 'pending':
+                actionButton = (
+                  <TouchableOpacity style={[styles.actionButton, styles.pendingButton]} disabled={true}>
+                    <Text style={styles.actionButtonText}>Đã gửi</Text>
+                  </TouchableOpacity>
+                );
+                break;
+              default: // 'not_friend'
+                actionButton = (
+                  <TouchableOpacity style={[styles.actionButton, styles.acceptButton]} onPress={() => handleSendRequest(user.id)}>
+                    <Text style={styles.actionButtonText}>Kết bạn</Text>
+                  </TouchableOpacity>
+                );
+                break;
+            }
+
+            return (
+              <FriendItem key={user.id} {...user}>
+                {actionButton}
+              </FriendItem>
+            );
+          })}
+        </View>
+      );
+    }
+
     return (
       <>
+        {/* Phần lời mời kết bạn */}
+        {friendRequests.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Lời mời kết bạn ({friendRequests.length})</Text>
+            {friendRequests.map(req => (
+              <FriendItem key={req.id} {...req} onRemove={() => handleAcceptRequest(req)}>
+                <TouchableOpacity style={[styles.actionButton, styles.acceptButton]} onPress={() => handleAcceptRequest(req)}>
+                  <Text style={styles.actionButtonText}>Chấp nhận</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.actionButton, styles.declineButton]} onPress={() => handleAcceptRequest(req)} >
+                  <Text style={styles.actionButtonText}>Từ chối</Text>
+                </TouchableOpacity>
+              </FriendItem>
+            ))}
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tìm bạn bè từ các ứng dụng khác</Text>
           <View style={styles.appLinksContainer}>
@@ -163,7 +325,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
           </View>
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Bạn bè của bạn</Text>
           {friends.map(friend => (
             <FriendItem
@@ -171,6 +333,14 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
               {...friend}
               onRemove={handleRemoveFriend}
             />
+          ))}
+        </View> */}
+        {/* Phần bạn bè hiện tại */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Bạn bè của bạn</Text>
+          {friends.length === 0 && <Text style={styles.infoText}>Hãy tìm và thêm bạn bè mới!</Text>}
+          {friends.map(friend => (
+            <FriendItem key={friend.id} {...friend} onRemove={handleRemoveFriend} />
           ))}
         </View>
       </>
@@ -194,7 +364,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
             {/* --- BƯỚC 3.7: CẬP NHẬT SỐ LƯỢNG BẠN BÈ ĐỘNG --- */}
             <Text style={styles.subtitle}>{friends.length} / 20 người bạn đã được bổ sung</Text>
           </View>
-          <SearchBarFriends value={searchText} onChangeText={setSearchText} />
+          <SearchBarFriends value={searchText} onChangeText={handleSearch} />
         </View>
 
         <ScrollView
@@ -296,6 +466,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 50,
     fontSize: 16,
+  },
+  infoText: { color: colors.secondaryText, textAlign: 'center', marginTop: 10 },
+  actionButton: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginLeft: 10 },
+  actionButtonText: { color: '#000', fontWeight: '600' },
+  acceptButton: { backgroundColor: colors.primary },
+  declineButton: { backgroundColor: colors.surface },
+  pendingButton: { backgroundColor: colors.tertiaryText, opacity: 0.7 },
+  friendButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.secondaryText,
+  },
+  friendButtonText: {
+    color: colors.secondaryText,
+    fontWeight: '600',
   },
 });
 
