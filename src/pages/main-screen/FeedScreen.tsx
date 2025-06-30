@@ -14,6 +14,9 @@ import {
 import TopBar from '../../component/camera/TopBar';
 import { usePosts } from '../../hooks/usePosts';
 import { convertPostsToFeedItems, FeedItem } from '../../utils/postUtils';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchProfile } from '../../redux/profileSlice';
 
 const { width, height } = Dimensions.get('window');
 
@@ -24,6 +27,8 @@ type FeedScreenProps = {
 const FeedScreen = ({ navigation } : FeedScreenProps) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
 
   // Convert API data to feed items
   React.useEffect(() => {
@@ -32,6 +37,12 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
       setFeedData(convertedData);
     }
   }, [posts]);
+
+  React.useEffect(() => {
+    if (profileStatus === 'idle') {
+      dispatch(fetchProfile());
+    }
+  }, [profileStatus, dispatch]);
 
   const handleProfilePress = () => {
     navigation?.navigate('ProfileScreen');
@@ -128,6 +139,7 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
           onCenterPress={handleCenterPress}
           onMessagePress={handleMessagePress}
           mode="feed"
+          profileImage={profileData?.profileImage}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFD700" />
@@ -147,6 +159,7 @@ const FeedScreen = ({ navigation } : FeedScreenProps) => {
         onCenterPress={handleCenterPress}
         onMessagePress={handleMessagePress}
         mode="feed"
+        profileImage={profileData?.profileImage}
       />
 
       <FlatList

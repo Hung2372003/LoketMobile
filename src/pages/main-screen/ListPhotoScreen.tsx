@@ -14,6 +14,9 @@ import FloatingCaptureButton from '../../component/locket-photo/FloatingCaptureB
 import TopBar from '../../component/camera/TopBar';
 import { usePosts } from '../../hooks/usePosts';
 import { convertPostsToPhotos, PhotoItem, getPhotoStats } from '../../utils/photoUtils';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchProfile } from '../../redux/profileSlice';
 
 type ListPhotoScreenProps = {
   onCapturePress?: () => void;
@@ -33,6 +36,8 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
                                                          }) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
 
   // Convert posts to photos array
   useEffect(() => {
@@ -43,6 +48,12 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
       setPhotos([]);
     }
   }, [posts]);
+
+  useEffect(() => {
+    if (profileStatus === 'idle') {
+      dispatch(fetchProfile());
+    }
+  }, [profileStatus, dispatch]);
 
   const handleProfilePress = () => {
     navigation?.navigate('ProfileScreen');
@@ -180,6 +191,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
         onCenterPress={handleCenterPress}
         onMessagePress={handleMessagePress}
         mode="feed"
+        profileImage={profileData?.profileImage}
       />
 
       {renderContent()}

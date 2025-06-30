@@ -19,6 +19,7 @@ interface TopBarProps {
   centerText?: string;
   showDropdown?: boolean;
   onCenterPress?: () => void;
+  profileImage?: string ;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -30,6 +31,7 @@ const TopBar: React.FC<TopBarProps> = ({
                                          centerText,
                                          showDropdown = false,
                                          onCenterPress,
+                                         profileImage,
                                        }) => {
   const onlineFriendsCount = friends.filter(friend => friend.isOnline).length;
 
@@ -72,7 +74,7 @@ const TopBar: React.FC<TopBarProps> = ({
       <View style={styles.container}>
         <TouchableOpacity style={styles.profileButton} onPress={onProfilePress}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/40' }}
+            source={{ uri: profileImage }}
             style={styles.profileImage}
           />
         </TouchableOpacity>

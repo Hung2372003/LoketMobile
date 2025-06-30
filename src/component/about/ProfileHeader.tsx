@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 
 interface ProfileHeaderProps {
@@ -14,6 +15,7 @@ interface ProfileHeaderProps {
   locketUrl: string;
   onEditPhoto: () => void;
   onShareLocket: () => void;
+  isUploading?: boolean;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -22,15 +24,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                                                        locketUrl,
                                                        onEditPhoto,
                                                        onShareLocket,
+                                                       isUploading,
                                                      }) => {
   return (
     <View style={styles.container}>
       <View style={styles.profileSection}>
         <View style={styles.profileImageContainer}>
           <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          {isUploading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator color="#FFFFFF" />
+          </View>
+          )}
         </View>
         <Text style={styles.nameText}>{name}</Text>
-        <TouchableOpacity onPress={onEditPhoto}>
+        <TouchableOpacity onPress={onEditPhoto} disabled={isUploading}>
           <Text style={styles.editPhotoText}>Edit Photo</Text>
         </TouchableOpacity>
       </View>
@@ -130,6 +138,13 @@ const styles = StyleSheet.create({
   shareIconText: {
     fontSize: 18,
     color: '#8E8E93',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject, // Phủ lên toàn bộ component cha
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60, // Giữ cho hình tròn giống avatar
   },
 });
 
