@@ -8,15 +8,19 @@ import {
   Text,
   TouchableOpacity,
   RefreshControl,
+  SafeAreaView,
 } from 'react-native';
 import PhotoGridItem from '../../component/locket-photo/PhotoGridItem';
-import FloatingCaptureButton from '../../component/locket-photo/FloatingCaptureButton';
 import TopBar from '../../component/camera/TopBar';
 import { usePosts } from '../../hooks/usePosts';
+<<<<<<< HEAD
 import { convertPostsToPhotos, PhotoItem, getPhotoStats } from '../../utils/photoUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
+=======
+import { convertPostsToPhotos, PhotoItem } from '../../utils/photoUtils';
+>>>>>>> main
 
 type ListPhotoScreenProps = {
   onCapturePress?: () => void;
@@ -39,7 +43,6 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
 
-  // Convert posts to photos array
   useEffect(() => {
     if (posts.length > 0) {
       const convertedPhotos = convertPostsToPhotos(posts);
@@ -68,8 +71,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
   };
 
   const handlePhotoPress = (photo: PhotoItem) => {
-    console.log('Photo pressed:', photo);
-    onPhotoPress?.(photo);
+    navigation.navigate('FeedScreen', {selectedPhotoId: photo.id});
   };
 
   const renderPhotoGrid = () => {
@@ -94,7 +96,6 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
               ]}
             />
           ))}
-          {/* Fill empty space if row is not complete */}
           {rowItems.length < ITEMS_PER_ROW &&
             Array.from({ length: ITEMS_PER_ROW - rowItems.length }).map((_, emptyIndex) => (
               <View
@@ -105,8 +106,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
                   emptyIndex === 0 && rowItems.length > 0 && styles.gridItemWithMargin
                 ]}
               />
-            ))
-          }
+            ))}
         </View>
       );
     }
@@ -171,18 +171,14 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
           />
         }
       >
-        <View style={styles.photoCountContainer}>
-          <Text style={styles.photoCountText}>
-            {photos.length} ảnh{photos.length > 0 && ` từ ${getPhotoStats(photos).uniquePosts} bài viết`}
-          </Text>
-        </View>
         {renderPhotoGrid()}
       </ScrollView>
+
     );
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TopBar
         centerText="Tất cả ảnh"
         showDropdown={false}
@@ -194,126 +190,51 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
         profileImage={profileData?.profileImage}
       />
 
-      {renderContent()}
+      <View style={styles.contentContainer}>
+        {renderContent()}
+      </View>
 
-      <FloatingCaptureButton onPress={onCapturePress} />
-    </View>
+      <View style={styles.bottomNav}>
+        <TouchableOpacity
+          style={styles.cameraButton}
+          onPress={onCapturePress}
+        >
+          <View style={styles.cameraButtonInner} />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: ITEM_MARGIN,
-    paddingBottom: 100,
-    paddingTop: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: ITEM_MARGIN,
-  },
-  gridItem: {
-    flex: 1,
-  },
-  gridItemWithMargin: {
-    marginLeft: ITEM_MARGIN,
-  },
-  emptyItem: {
-    flex: 1,
-  },
-  // Photo count
-  photoCountContainer: {
-    marginTop: ITEM_MARGIN,
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-  },
-  photoCountText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    opacity: 0.8,
-  },
+  container: { flex: 1, backgroundColor: '#000' },
+  contentContainer: { flex: 1 },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: ITEM_MARGIN, paddingBottom: 140, paddingTop: 140 },
+  row: { flexDirection: 'row', marginBottom: ITEM_MARGIN },
+  gridItem: { flex: 1 },
+  gridItemWithMargin: { marginLeft: ITEM_MARGIN },
+  emptyItem: { flex: 1 },
   // Loading, Empty, and Error States
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-    paddingBottom: 100, // Account for floating button
+    paddingBottom: 100,
   },
-  loadingText: {
-    color: '#fff',
-    fontSize: 16,
-    marginTop: 15,
-    opacity: 0.8,
-  },
-  // Empty State
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    color: '#fff',
-    fontSize: 16,
-    opacity: 0.7,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 30,
-  },
-  // Error State
-  errorIcon: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  errorTitle: {
-    color: '#ff6b6b',
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  errorDescription: {
-    color: '#ff6b6b',
-    fontSize: 16,
-    opacity: 0.8,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 30,
-  },
-  // Retry Button
-  retryButton: {
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-    elevation: 3,
-    shadowColor: '#FFD700',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  retryButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  loadingText: { color: '#fff', fontSize: 16, marginTop: 15, opacity: 0.8 },
+  emptyIcon: { fontSize: 64, marginBottom: 20 },
+  emptyTitle: { color: '#fff', fontSize: 24, fontWeight: '600', marginBottom: 10, textAlign: 'center' },
+  emptyDescription: { color: '#fff', fontSize: 16, opacity: 0.7, textAlign: 'center', lineHeight: 24, marginBottom: 30 },
+  errorIcon: { fontSize: 64, marginBottom: 20 },
+  errorTitle: { color: '#ff6b6b', fontSize: 24, fontWeight: '600', marginBottom: 10, textAlign: 'center' },
+  errorDescription: { color: '#ff6b6b', fontSize: 16, opacity: 0.8, textAlign: 'center', lineHeight: 24, marginBottom: 30 },
+  retryButton: { backgroundColor: '#FFD700', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 25, elevation: 3, shadowColor: '#FFD700', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 },
+  retryButtonText: { color: '#000', fontSize: 16, fontWeight: '600' },
+  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', paddingBottom: 20 },
+  cameraButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: '#FFD700' },
+  cameraButtonInner: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#fff' },
 });
 
 export default ListPhotoScreen;

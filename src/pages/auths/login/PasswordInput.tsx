@@ -47,7 +47,10 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
       await storage.storeTokens(token);
       await storage.storeUserId(userId);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 //      Alert.alert(title);
       navigation.navigate('MainScreen');
     } catch (error) {

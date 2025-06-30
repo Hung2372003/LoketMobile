@@ -117,5 +117,17 @@ export const postService = {
 
       throw error;
     }
-  }
+  },
+
+  async deletePost(id: number) {
+    try {
+      const response = await axiosInstance.delete(`/api/PostManagement/DeletePost`, {
+        params: { id }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      throw error;
+    }
+  },
 };
