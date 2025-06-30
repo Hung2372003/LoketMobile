@@ -92,6 +92,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     // TODO: Navigate to history screen
     console.log('Navigate to history');
   };
+  
 
 
   // Loading state

@@ -10,6 +10,7 @@ export const colors = {
   zaloBlue: '#0068FF',
   instagramWhite: '#fff',
   iconDefault: '#555555',
+  loading: '#ffb700',
   // ... thêm các màu khác
 };
 

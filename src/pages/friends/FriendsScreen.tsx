@@ -8,6 +8,8 @@ import {
   Dimensions,
   StyleSheet,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import FriendItem from '../../component/friends/FriendItem';
 import AppLink from '../../component/friends/AppLink';
@@ -15,6 +17,7 @@ import SearchBarFriends from '../../component/friends/SearchBarFriends';
 import { Friend, AppLinkData } from '../../types/friend';
 import { colors, typography, spacing } from './friend.style';
 import { useFocusEffect} from '@react-navigation/native';
+import friendService from '../../services/friendService';
 
 interface FriendsScreenProps {
   navigation: any; // Replace with proper navigation type
@@ -24,12 +27,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PULL_THRESHOLD = SCREEN_HEIGHT * 0.25;
 const ANIMATION_DURATION_OUT = 300;
 const ANIMATION_DURATION_BACK = 200;
-
-const MOCK_FRIENDS_DATA: Friend[] = [
-  { id: '1', name: 'Chien Pham', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
-  { id: '2', name: 'Huy Phuc', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
-  { id: '3', name: 'Hung Van', avatar: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/135bfa79-b0f9-4ca9-95ba-b81f8f61c8ab/dhsxvbo-55be135b-4d19-406a-a79f-34e7c7840272.png/v1/fill/w_1280,h_1280/toon_link_in_my_avatar_style_by_bluetoad_10_dhsxvbo-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzEzNWJmYTc5LWIwZjktNGNhOS05NWJhLWI4MWY4ZjYxYzhhYlwvZGhzeHZiby01NWJlMTM1Yi00ZDE5LTQwNmEtYTc5Zi0zNGU3Yzc4NDAyNzIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.FpqAbQIQv3qLMIKR0GbzniJ0jWdeknJwT9bvP0GWFFE' },
-];
 
 const MOCK_APP_LINKS_DATA: AppLinkData[] = [
   { id: 'app1', appName: 'Messenger', isImage: true, imageSource: require('../../assets/messenger.png') },
@@ -45,19 +42,44 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
   const opacity = useRef(new Animated.Value(1)).current;
   const [isAtTop, setIsAtTop] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-   useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
+      const fetchFriends = async () => {
+        try {
+          setIsLoading(true);
+          setError(null);
+          const friendsFromApi = await friendService.getFriends();
+
+          // Map dữ liệu từ API sang
+          const mappedFriends: Friend[] = friendsFromApi.map((friend: any) => ({
+            id: String(friend.userCode),
+            name: friend.name,
+            avatar: friend.path,
+          }));
+
+          setFriends(mappedFriends);
+
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Lỗi không xác định';
+          setError(errorMessage);
+          Alert.alert('Lỗi', errorMessage);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchFriends();
 
       // Reset lại vị trí và độ mờ của màn hình ngay lập tức
-      // mà không cần animation.
       pan.setValue({ x: 0, y: 0 });
       opacity.setValue(1);
       // Đảm bảo trạng thái isAtTop cũng được reset nếu cần
       setIsAtTop(true);
 
-      // Hàm dọn dẹp (cleanup) sẽ chạy khi màn hình bị unfocus.
-      // Không bắt buộc cho trường hợp này nhưng nên biết.
       return () => {
         pan.stopAnimation();
         opacity.stopAnimation();
@@ -119,23 +141,49 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
 
   const handleRemoveFriend = (id: string) => {
     console.log('Remove friend with id:', id);
-    // Thêm logic xóa bạn ở đây
+    // Thêm logic xóa
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <ActivityIndicator size="large" color={colors.loading} style={{ marginTop: 50 }} />;
+    }
+    if (error) {
+      return <Text style={styles.errorText}>Lỗi: {error}</Text>;
+    }
+
+    return (
+      <>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tìm bạn bè từ các ứng dụng khác</Text>
+          <View style={styles.appLinksContainer}>
+            {MOCK_APP_LINKS_DATA.map(app => (
+              <AppLink key={app.id} {...app} onPress={() => console.log(`Open ${app.appName}`)}/>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Bạn bè của bạn</Text>
+          {friends.map(friend => (
+            <FriendItem
+              key={friend.id}
+              {...friend}
+              onRemove={handleRemoveFriend}
+            />
+          ))}
+        </View>
+      </>
+    );
   };
 
   return (
     <View style={styles.screenContainer}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Animated.View
-      style={[
-        styles.animatedContainer,
-        {
-          opacity: opacity,
-          transform: [{ translateY: pan.y }],
-        },
-      ]}
-      {...panResponder.panHandlers}
+        style={[ styles.animatedContainer, { opacity: opacity, transform: [{ translateY: pan.y }] } ]}
+        {...panResponder.panHandlers}
       >
-        {/* Thanh kéo trực quan */}
         <View style={styles.pullDownHandleContainer}>
           <View style={styles.pullDownHandle} />
         </View>
@@ -143,7 +191,8 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
         <View style={styles.fixedContentWrapper}>
           <View style={styles.header}>
             <Text style={styles.title}>Bạn bè của bạn</Text>
-            <Text style={styles.subtitle}>3 / 20 người bạn đã được bổ sung</Text>
+            {/* --- BƯỚC 3.7: CẬP NHẬT SỐ LƯỢNG BẠN BÈ ĐỘNG --- */}
+            <Text style={styles.subtitle}>{friends.length} / 20 người bạn đã được bổ sung</Text>
           </View>
           <SearchBarFriends value={searchText} onChangeText={setSearchText} />
         </View>
@@ -154,25 +203,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tìm bạn bè từ các ứng dụng khác</Text>
-            <View style={styles.appLinksContainer}>
-              {MOCK_APP_LINKS_DATA.map(app => (
-                <AppLink key={app.id} {...app} onPress={() => console.log(`Open ${app.appName}`)}/>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Bạn bè của bạn</Text>
-            {MOCK_FRIENDS_DATA.map(friend => (
-              <FriendItem
-                key={friend.id}
-                {...friend}
-                onRemove={handleRemoveFriend}
-              />
-            ))}
-          </View>
+          {renderContent()}
           <View style={{ height: PULL_THRESHOLD * 1.5 }} />
         </ScrollView>
       </Animated.View>
@@ -259,6 +290,12 @@ const styles = StyleSheet.create({
     fontWeight: '500' as '500',
     color: colors.primaryText,
     marginRight: spacing.small,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
   },
 });
 

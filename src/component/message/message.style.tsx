@@ -10,7 +10,7 @@ export const MessageStyles = StyleSheet.create({
   },
   time: {
     marginVertical: 17,
-    color:'#fff',
+    color:'#cacaca',
   },
   messageContainer: {
     flexDirection:'row',
@@ -48,7 +48,7 @@ export const MessageStyles = StyleSheet.create({
   },
   content: {
     borderRadius: 23,
-    paddingVertical: 7,
+    paddingVertical: 11,
     paddingHorizontal: 17,
     maxWidth: '75%',
   },
