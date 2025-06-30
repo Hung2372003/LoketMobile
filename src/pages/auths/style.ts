@@ -83,6 +83,28 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 8,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  loadingText: {
+    color: '#FFF',
+    fontSize: 16,
+    marginTop: 20,
+  },
+  loadingOverlay: {
+    position: 'absolute', // Định vị tuyệt đối so với component cha
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền đen mờ 50%
+    justifyContent: 'center', // Căn giữa theo chiều dọc
+    alignItems: 'center', // Căn giữa theo chiều ngang
+    zIndex: 10, // Đảm bảo nó nằm trên các thành phần khác
+  },
 });
 
 export default styles;

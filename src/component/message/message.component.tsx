@@ -36,7 +36,7 @@ export const Message: React.FC<MessageProps> = ({
   const appliedTheme = theme ?? {
     messageSentBackgroundColor: '#e3e3e3d6',
     messageReceivedBackgroundColor: '#363636d1',
-    messageSentColor: 'black',
+    messageSentColor: '#000000',
     messageReceivedColor: 'white',
     hoverIcon: 'rgba(227, 227, 227, 0.7)',
     colorIcon: '#898989',

@@ -56,6 +56,7 @@ import React from 'react';
 import {StyleSheet, StatusBar, SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigation from './src/navigation/AppNavigation';
+import 'react-native-url-polyfill/auto';
 
 
 const App: React.FC = () => {

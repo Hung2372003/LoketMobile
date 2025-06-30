@@ -4,7 +4,6 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 
 const USER_ID_KEY = 'userId';
 
-
 const storeTokens = async (accessToken: string ) => {
   try {
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
