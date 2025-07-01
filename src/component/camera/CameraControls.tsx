@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import Feather from '@react-native-vector-icons/feather';
 
 interface CameraControlsProps {
   onTakePhoto: () => void;
@@ -24,9 +25,15 @@ const CameraControls: React.FC<CameraControlsProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.flashButton} onPress={onToggleFlash}>
-        <Text style={styles.flashIcon}>
-          {flashMode === 'on' ? '⚡' : flashMode === 'off' ? 'on' : 'off'}
-        </Text>
+        {flashMode === 'on' && (
+          <Feather name="zap" size={24} color="#FFD700" style={styles.flashIcon} />
+        )}
+        {flashMode === 'off' && (
+          <Feather name="zap-off" size={24} color="#FFF" style={styles.flashIcon} />
+        )}
+        {flashMode === 'auto' && (
+          <Feather name="zap" size={24} color="#AAA" style={styles.flashIcon} />
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -42,7 +49,8 @@ const CameraControls: React.FC<CameraControlsProps> = ({
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.flipButton} onPress={onToggleCamera}>
-        <Text style={styles.flipIcon}>🔄</Text>
+        {/*<Text style={styles.flipIcon}>🔄</Text>*/}
+        <Feather name="refresh-ccw" size={24} color="#FFF" />
       </TouchableOpacity>
     </View>
   );
@@ -73,22 +81,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 4,
-    borderColor: '#FFA500',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    borderWidth: 3,
+    borderColor: '#FFD700',
   },
   captureButtonInner: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#fff',
   },
   loadingRing: {
     width: 50,

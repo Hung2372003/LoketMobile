@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Animated,
   Alert,
-  Platform,
+  Platform, InteractionManager,
 } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import TopBar from '../../component/camera/TopBar';
@@ -22,7 +22,6 @@ import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {postService} from '../../services/postService.ts';
-import authService from '../../services/authService.ts';
 import storage from '../../api/storage.ts';
 const { width, height } = Dimensions.get('window');
 import { useSelector, useDispatch } from 'react-redux';
@@ -44,7 +43,7 @@ type FeedScreenProps = {
 };
 
 type FeedScreenRouteParams = {
-  selectedPhotoId?: string;
+  selectedPhotoId?: number;
   photoTransition?: any; // nếu có
 };
 
@@ -59,39 +58,62 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [isTransitioning, setIsTransitioning] = useState(false);
   const pagerRef = useRef<PagerView>(null);
-  const routePhoto = useRoute<RouteProp<Record<string, FeedScreenRouteParams>, string>>();
+  const routePhoto = useRoute<RouteProp<{ FeedScreen: FeedScreenRouteParams }, 'FeedScreen'>>();
   const { selectedPhotoId } = routePhoto.params ?? {};
-
-  const selectedIndex = feedData.findIndex(feedItem => feedItem.id === selectedPhotoId);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [didNavigate, setDidNavigate] = useState(false);
 
   // Animation states cho transition
   const [transitionAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(1));
   const [positionAnim] = useState(new Animated.ValueXY({ x: 0, y: 0 }));
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const userIdStr = await storage.getUserId();
+      setCurrentUserId(Number(userIdStr));
+    };
+    fetchUserId();
+  }, []);
+
+
   // Convert và giữ nguyên data
   useEffect(() => {
     if (posts.length > 0) {
       const converted = convertPostsToFeedItems(posts);
-      setFeedData(converted);
+      const filtered = converted.filter(item => item.user.name !== 'Admin');
+      setFeedData(filtered);
     }
   }, [posts]);
+
 
   React.useEffect(() => {
     dispatch(fetchProfile());
   }, [dispatch]);
   // Handle navigation params khi component mount
   useEffect(() => {
-    if (selectedPhotoId && feedData.length > 0 && pagerRef.current) {
-      const index = feedData.findIndex(item => item.id === selectedPhotoId);
-      console.log('Selected ID:', selectedPhotoId);
-      console.log('FeedData IDs:', feedData.map(i => i.id));
-      console.log('Index found:', index);
+    if (
+      selectedPhotoId &&
+      feedData.length > 0 &&
+      pagerRef.current &&
+      !didNavigate
+    ) {
+      const index = feedData.findIndex(item => Number(item.id) === Number(selectedPhotoId));
+      console.log('selectedPhotoId:', selectedPhotoId);
+      console.log('feedData ids:', feedData.map(i => i.id));
+      console.log('Found index:', index);
+
       if (index >= 0) {
-        pagerRef.current.setPage(index);
+        InteractionManager.runAfterInteractions(() => {
+          pagerRef.current?.setPage(index);
+          setCurrentIndex(index);
+          setDidNavigate(true);
+        });
       }
     }
-  }, [selectedPhotoId, feedData]);
+  }, [selectedPhotoId, feedData, didNavigate]);
+
 
 
   // Handle photo transition animation
@@ -178,7 +200,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   };
 
   const handleCenterPress = () => {
-    console.log('Center button pressed');
+    navigation?.navigate('FriendsScreen');
   };
 
   const handleMessagePress = () => {
@@ -220,8 +242,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         return;
       }
 
-      Alert.alert('Đang tải', 'Đang tải ảnh xuống...');
-
+      setDownloading(true);
       // Tạo tên file unique
       const timestamp = new Date().getTime();
       const fileExtension = imageUrl.split('.').pop() || 'jpg';
@@ -255,6 +276,8 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     } catch (error) {
       console.log('Download error:', error);
       Alert.alert('Lỗi', 'Không thể tải ảnh xuống. Vui lòng thử lại.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -286,6 +309,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         } else {
           Alert.alert('Lỗi', 'Không tìm thấy ảnh để tải xuống');
         }
+        setShowPopup(false);
         break;
 
       case 'share':
@@ -299,9 +323,6 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           Alert.alert('Lỗi', 'Không tìm thấy bài viết');
           break;
         }
-
-        const userIdStr = await storage.getUserId();
-        const currentUserId = Number(userIdStr);
 
         if (postItem.user.id !== currentUserId) {
           Alert.alert('Thông báo', 'Bạn không thể xóa bài viết của người khác');
@@ -382,23 +403,24 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         {feedData.map((item, index) => (
           <View key={item.id} style={styles.feedItem}>
             <View style={styles.imageContainer}>
-              <Animated.Image
-                source={{ uri: item.image }}
-                style={[
-                  styles.feedImage,
-                  isTransitioning && index === currentIndex && {
-                    opacity: transitionAnim,
-                    transform: [
-                      { scale: scaleAnim },
-                      { translateX: positionAnim.x },
-                      { translateY: positionAnim.y },
-                    ],
-                  },
-                ]}
-                onError={(error) => {
-                  console.log('Image load error:', error.nativeEvent.error);
-                }}
-              />
+                <Animated.Image
+                  source={{ uri: item.image }}
+                  style={[
+                    styles.feedImage,
+                    isTransitioning && index === currentIndex && {
+                      opacity: transitionAnim,
+                      transform: [
+                        { scale: scaleAnim },
+                        { translateX: positionAnim.x },
+                        { translateY: positionAnim.y },
+                      ],
+                    },
+                  ]}
+                  onError={(error) => {
+                    console.log('Image load error:', error.nativeEvent.error);
+                  }}
+                />
+
               {item.caption && (
                 <View style={styles.captionOverlay}>
                   <Text style={styles.caption}>{item.caption}</Text>
@@ -420,23 +442,30 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
               </View>
             </View>
 
-            <View style={styles.messageInputArea}>
-              <TouchableOpacity style={styles.messageInput}>
-                <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
-                <Text style={styles.emoji}>💛</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
-                <Text style={styles.emoji}>🔥</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
-                <Text style={styles.emoji}>😂</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
-                <Text style={styles.emoji}>😍</Text>
-              </TouchableOpacity>
-            </View>
+            {item.user.id === currentUserId ? (
+              <View style={styles.noActivityContainer}>
+                <Text style={styles.noActivityText}>✨ Chưa có hoạt động nào!</Text>
+              </View>
+            ) : (
+              <View style={styles.messageInputArea}>
+                <TouchableOpacity style={styles.messageInput}>
+                  <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.emojiButton}>
+                  <Text style={styles.emoji}>💛</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.emojiButton}>
+                  <Text style={styles.emoji}>🔥</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.emojiButton}>
+                  <Text style={styles.emoji}>😂</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.emojiButton}>
+                  <Text style={styles.emoji}>😍</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
           </View>
         ))}
       </PagerView>
@@ -452,7 +481,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.cameraButton}>
+        <TouchableOpacity style={styles.cameraButton} onPress={() => navigation.navigate('MainScreen')}>
           <View style={styles.cameraButtonInner} />
         </TouchableOpacity>
 
@@ -467,11 +496,19 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
 
       {/* Feed Options Modal */}
       <FeedOptionsModal
-        visible={showPopup}
+        visible={showPopup && !downloading}
         onClose={handleClosePopup}
         onMenuAction={handleMenuAction}
         fadeAnim={fadeAnim}
       />
+
+      {downloading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Đang tải ảnh...</Text>
+        </View>
+      )}
+
     </SafeAreaView>
   );
 };
@@ -715,6 +752,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 3,
     marginHorizontal: 2,
+  },
+  noActivityContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+
+  noActivityText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
