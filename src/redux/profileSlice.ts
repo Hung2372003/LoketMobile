@@ -35,7 +35,6 @@ export const updateProfileName = createAsyncThunk(
   }
 );
 
-
 // --- Định nghĩa cấu trúc của state trong slice này ---
 interface ProfileState {
   data: Profile | null;

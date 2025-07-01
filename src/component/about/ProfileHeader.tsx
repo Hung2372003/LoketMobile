@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   onShareLocket: () => void;
   isUploading?: boolean;
   onBack?: () => void;
+
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -38,6 +39,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Feather name="chevron-left" size={24} color="#e5e5e5" />
+        <View style={styles.profileImageContainer}>
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          {isUploading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator color="#FFFFFF" />
+          </View>
+          )}
+        </View>
+        <Text style={styles.nameText}>{name}</Text>
+        <TouchableOpacity onPress={onEditPhoto} disabled={isUploading}>
+          <Text style={styles.editPhotoText}>Edit Photo</Text>
         </TouchableOpacity>
         <View style={styles.profileContent}>
           <View style={styles.profileImageContainer}>

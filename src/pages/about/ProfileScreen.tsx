@@ -290,6 +290,20 @@ const handleEditName = () => {
       </View>
     );
   }
+  
+  // Hiển thị lỗi nếu fetch thất bại
+  if (status === 'failed') {
+      return <View style={styles.container}><Text style={styles.errorText}>Lỗi: {error}</Text></View>
+  }
+
+  // if (isLoading) {
+  //   return (
+  //     <View style={[styles.container, styles.centerContent]}>
+  //       <StatusBar barStyle="light-content" backgroundColor="#000000" />
+  //       <ActivityIndicator size="large" color="#ffb700" />
+  //     </View>
+  //   );
+  // }
 
   // Hiển thị lỗi nếu fetch thất bại
   if (status === 'failed') {
