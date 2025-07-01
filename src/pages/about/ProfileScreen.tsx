@@ -6,6 +6,9 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import ProfileHeader from '../../component/about/ProfileHeader.tsx';
 import MenuSection from '../../component/about/MenuSection.tsx';
@@ -13,11 +16,17 @@ import { MenuSectionType } from '../../types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store'; // Giả sử store ở thư mục redux
-import { fetchProfile, uploadAvatar } from '../../redux/profileSlice'; // Import các actions
+import { fetchProfile, resetProfile, updateProfileName, uploadAvatar } from '../../redux/profileSlice'; // Import các actions
 import { launchImageLibrary } from 'react-native-image-picker'; // Thư viện chọn ảnh cho RN CLI
 import { Text } from 'react-native-gesture-handler';
+import userService from '../../services/userService.ts';
+import storage from '../../api/storage'
 
-const ProfileScreen: React.FC = () => {
+interface ProfileScreenProps {
+  navigation: any; // Replace with proper navigation type
+}
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })  => {
   const dispatch = useDispatch<AppDispatch>();
 
   // Lấy dữ liệu và trạng thái từ Redux store
@@ -25,6 +34,8 @@ const ProfileScreen: React.FC = () => {
 
   // Vẫn dùng useState cho các state chỉ thuộc về giao diện của màn hình này
   const [convenientMode, setConvenientMode] = useState(true);
+  const [newName, setNewName] = useState('');
+  const [isEditNameModalVisible, setIsEditNameModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -56,9 +67,54 @@ const ProfileScreen: React.FC = () => {
     });
   };
 
+const handleEditName = () => {
+    if (!newName.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập tên mới.');
+      return;
+    }
+
+    Alert.alert(
+      'Xác nhận',
+      `Bạn có muốn cập nhật tên thành "${newName}" không?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Cập nhật',
+          onPress: async () => {
+            try {
+              await dispatch(updateProfileName(newName)).unwrap();
+              setNewName('');
+              setIsEditNameModalVisible(false);
+              Alert.alert('Thành công', 'Tên đã được cập nhật.');
+            } catch (err: any) {
+              Alert.alert('Lỗi', err.message || 'Cập nhật tên thất bại.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleShareLocket = () => {
     // Share locket functionality
     console.log('Share locket pressed');
+  };
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await userService.logout();
+      console.log('User has been logged out.');
+      await storage.clearTokens();
+      await storage.clearUserId();
+      dispatch(resetProfile());
+      navigation.navigate('HomeRegister');
+    } catch (error: any) {
+      Alert.alert('Lỗi', `Đăng xuất không thành công: ${error.message || 'Không rõ nguyên nhân.'}`);
+    }
   };
 
   const menuSections: MenuSectionType[] = [
@@ -94,7 +150,7 @@ const ProfileScreen: React.FC = () => {
           id: '4',
           title: 'Sửa tên',
           icon: '👤',
-          onPress: () => console.log('Edit name'),
+          onPress: () => setIsEditNameModalVisible(true),
         },
         {
           id: '5',
@@ -214,7 +270,10 @@ const ProfileScreen: React.FC = () => {
               'Bạn có chắc chắn muốn đăng xuất không?',
               [
                 { text: 'Hủy', style: 'cancel' },
-                { text: 'Đăng xuất', style: 'destructive' },
+                { text: 'Đăng xuất',
+                  style: 'destructive',
+                  onPress: handleLogout,
+                },
               ]
             );
           },
@@ -246,6 +305,20 @@ const ProfileScreen: React.FC = () => {
   //   );
   // }
 
+  // Hiển thị lỗi nếu fetch thất bại
+  if (status === 'failed') {
+      return <View style={styles.container}><Text style={styles.errorText}>Lỗi: {error}</Text></View>;
+  }
+
+  // if (isLoading) {
+  //   return (
+  //     <View style={[styles.container, styles.centerContent]}>
+  //       <StatusBar barStyle="light-content" backgroundColor="#000000" />
+  //       <ActivityIndicator size="large" color="#ffb700" />
+  //     </View>
+  //   );
+  // }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -261,6 +334,7 @@ const ProfileScreen: React.FC = () => {
             onEditPhoto={handleEditPhoto}
             onShareLocket={handleShareLocket}
             isUploading={isUploadingAvatar}
+            onBack={handleBack}
           />
         )}
 
@@ -274,6 +348,40 @@ const ProfileScreen: React.FC = () => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      <Modal
+        visible={isEditNameModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsEditNameModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sửa tên của bạn</Text>
+            <TextInput
+              style={styles.input}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Nhập tên mới"
+              placeholderTextColor="#999"
+              autoFocus={true}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setIsEditNameModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleEditName}
+              >
+                <Text style={styles.buttonText}>Lưu</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -296,7 +404,61 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     textAlign: 'center',
-    marginTop: '50%'
+    marginTop: '50%',
+  },modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a', // Nền tối
+    padding: 20,
+    borderRadius: 40,
+    width: '85%',
+    elevation: 10, // Hiệu ứng bóng trên Android
+    shadowColor: '#000', // Hiệu ứng bóng trên iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#333333',
+    borderRadius: 18,
+    padding: 12,
+    marginBottom: 20,
+    color: '#ffffff',
+    backgroundColor: '#2d2d2d', // Nền input tối
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#666666',
+  },
+  saveButton: {
+    backgroundColor: '#ffb700',
+  },
+  buttonText: {
+    color: '#ffffff',
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });
 

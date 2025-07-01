@@ -43,10 +43,10 @@ const EmailLogin: React.FC<EmailLoginProps> = ({ navigation })  => {
               placeholder='Địa chỉ email' 
               onChangeText={setEmail}
           />
-          <Option 
+          {/* <Option 
               title='Sử dụng số điện thoại thay cho cách này'
               onChangeMethod={handlePhoneLogin}
-          />
+          /> */}
           <View style={{flex: 1}} />
           <Submit
             onSubmit={handleNext}
