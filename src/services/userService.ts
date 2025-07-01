@@ -20,6 +20,41 @@ const getMyProfile = async () => {
     }
 };
 
+const logout = async () => {
+    try {
+      const response = await axiosInstance.post('/api/Security/Logout');
+      if(response.data.error) {
+          throw new Error('Lỗi khi lấy thông tin profile.');
+      }
+      return response.data.object;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const updateProfileName = async (newName: string) => {
+  const formData = new FormData();
+  formData.append('Name', newName);
+
+  try {
+    // 3. Gửi request với FormData và header đặc biệt
+    const response = await axiosInstance.post('/api/PersonalAction/UpdatePersonalInfor', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.data.error) {
+      throw new Error(response.data.title || 'Cập nhật tên thất bại.');
+    }
+
+    // Trả về dữ liệu thành công (nếu có)
+    return response.data.object; 
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Hàm cập nhật thông tin profile
 const updateMyProfile = async (profileData: { fullName: string; phoneNumber?: string }) => {
   try {
@@ -70,6 +105,8 @@ const userService = {
     getMyProfile,
     updateMyProfile,
     updateAvatar,
+    logout,
+    updateProfileName,
 };
 
 export default userService;

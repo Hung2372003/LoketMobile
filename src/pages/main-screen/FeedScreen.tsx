@@ -53,7 +53,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
   const dispatch = useDispatch<AppDispatch>();
-  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
+  const { data: profileData } = useSelector((state: RootState) => state.profile);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -78,10 +78,8 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   }, [posts]);
 
   React.useEffect(() => {
-    if (profileStatus === 'idle') {
-      dispatch(fetchProfile());
-    }
-  }, [profileStatus, dispatch]);
+    dispatch(fetchProfile());
+  }, [dispatch]);
   // Handle navigation params khi component mount
   useEffect(() => {
     if (selectedPhotoId && feedData.length > 0 && pagerRef.current) {

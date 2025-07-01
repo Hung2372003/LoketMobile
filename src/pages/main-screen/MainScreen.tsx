@@ -31,7 +31,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
   const dispatch = useDispatch<AppDispatch>();
   // Lấy dữ liệu profile và trạng thái fetch từ store
-  const { data: profileData, status: profileStatus } = useSelector((state: RootState) => state.profile);
+  const { data: profileData } = useSelector((state: RootState) => state.profile);
 
   const [friends, setFriends] = useState<Friend[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -42,11 +42,9 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     : devices.find(d => d.position === 'back');
 
   useEffect(() => {
-    if (profileStatus === 'idle') {
-      dispatch(fetchProfile());
-    }
+    dispatch(fetchProfile());
     loadInitialData();
-  }, [profileStatus, dispatch]);
+  }, [dispatch]);
 
   const loadInitialData = async () => {
     try {

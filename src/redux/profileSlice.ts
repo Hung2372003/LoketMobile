@@ -22,12 +22,26 @@ export const uploadAvatar = createAsyncThunk('profile/uploadAvatar', async (imag
     return response.avatar; 
 });
 
+export const updateProfileName = createAsyncThunk(
+  'profile/updateName',
+  async (newName: string, { rejectWithValue }) => {
+    try {
+      // Gọi API và chỉ cần trả về tên mới để cập nhật state
+      await userService.updateProfileName(newName);
+      return newName;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 // --- Định nghĩa cấu trúc của state trong slice này ---
 interface ProfileState {
   data: Profile | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   isUploadingAvatar: boolean;
+  isUpdatingName: boolean;
   error: string | null;
 }
 
@@ -35,6 +49,7 @@ const initialState: ProfileState = {
   data: null,
   status: 'idle',
   isUploadingAvatar: false,
+  isUpdatingName: false,
   error: null,
 };
 
@@ -44,7 +59,14 @@ const profileSlice = createSlice({
   name: 'profile',
   initialState,
   reducers: {
-    // Có thể thêm các reducer đồng bộ ở đây nếu cần
+     resetProfile: (state) => {
+      // Gán lại state về giá trị khởi tạo ban đầu
+      state.data = null;
+      state.status = 'idle';
+      state.isUploadingAvatar = false;
+      state.isUpdatingName = false;
+      state.error = null;
+    },
   },
   // Xử lý các trạng thái của hành động bất đồng bộ
   extraReducers: (builder) => {
@@ -80,8 +102,28 @@ const profileSlice = createSlice({
           // KHI UPLOAD THẤT BẠI: Tắt trạng thái loading
           state.isUploadingAvatar = false;
           // Có thể thêm logic xử lý lỗi ở đây
+      })
+      .addCase(updateProfileName.pending, (state) => {
+        state.isUpdatingName = true;
+        state.error = null; // Xóa lỗi cũ
+      })
+      .addCase(updateProfileName.fulfilled, (state, action: PayloadAction<string>) => {
+        if (state.data) {
+          // Tạo một object mới để đảm bảo component re-render
+          state.data = {
+            ...state.data,
+            name: action.payload, // Cập nhật tên mới
+          };
+          state.isUpdatingName = false;
+        }
+      })
+      .addCase(updateProfileName.rejected, (state, action) => {
+        state.isUpdatingName = false;
+        state.error = action.payload as string;
       });
   },
 });
+
+export const { resetProfile } = profileSlice.actions;
 
 export default profileSlice.reducer;
