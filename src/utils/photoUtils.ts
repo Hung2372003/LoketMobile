@@ -5,7 +5,7 @@ export interface PhotoItem {
   id: string;
   uri: string;
   type: string;
-  postId: string;
+  postId: number;
   userName: string;
   userAvatar: string;
   createdTime: string;
@@ -24,7 +24,7 @@ export const convertPostsToPhotos = (posts: Post[]): PhotoItem[] => {
             id: `${post.id}-${file.id}`,
             uri: file.path,
             type: file.type,
-            postId: post.id.toString(),
+            postId: post.id,
             userName: post.name,
             userAvatar: post.avatar,
             createdTime: post.createdTime,

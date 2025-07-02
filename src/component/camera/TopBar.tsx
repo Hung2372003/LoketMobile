@@ -8,6 +8,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { Friend } from '../../types/camera';
+import Feather from '@react-native-vector-icons/feather';
 
 interface TopBarProps {
   friends?: Friend[];
@@ -61,7 +62,8 @@ const TopBar: React.FC<TopBarProps> = ({
     return (
       <TouchableOpacity style={styles.friendsButton} onPress={onCenterPress}>
         <View style={styles.friendsIcon}>
-          <Text style={styles.friendsIconText}>👥</Text>
+          {/*<Text style={styles.friendsIconText}>👥</Text>*/}
+          <Feather name="user-x" style={styles.friendsIcon} />
         </View>
         <Text style={styles.friendsText}>{getCenterText()}</Text>
       </TouchableOpacity>
@@ -85,13 +87,15 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <TouchableOpacity style={styles.messageButton} onPress={onMessagePress}>
           <View style={styles.messageIcon}>
-            <Text style={styles.messageIconText}>💬</Text>
+            <Feather name="message-circle" size={24} color="#FFF" />
+
             {notificationCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{notificationCount}</Text>
               </View>
             )}
           </View>
+
         </TouchableOpacity>
       </View>
     </>
@@ -113,12 +117,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   profileButton: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
   },
   profileImage: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: '#FFF',
@@ -138,6 +142,8 @@ const styles = StyleSheet.create({
   },
   friendsIcon: {
     marginRight: 8,
+    color: '#FFF',
+    fontSize: 16,
   },
   friendsIconText: {
     fontSize: 16,
@@ -179,6 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
+    color: 'FFF',
   },
   messageIconText: {
     fontSize: 20,

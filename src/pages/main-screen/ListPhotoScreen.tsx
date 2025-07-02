@@ -13,7 +13,7 @@ import {
 import PhotoGridItem from '../../component/locket-photo/PhotoGridItem';
 import TopBar from '../../component/camera/TopBar';
 import { usePosts } from '../../hooks/usePosts';
-import { convertPostsToPhotos, PhotoItem, getPhotoStats } from '../../utils/photoUtils';
+import { convertPostsToPhotos, PhotoItem } from '../../utils/photoUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
@@ -31,7 +31,6 @@ const ITEM_WIDTH = (screenWidth - (ITEM_MARGIN * (ITEMS_PER_ROW + 1))) / ITEMS_P
 
 const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
                                                            onCapturePress,
-                                                           onPhotoPress,
                                                            navigation
                                                          }) => {
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
@@ -67,7 +66,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
   };
 
   const handlePhotoPress = (photo: PhotoItem) => {
-    navigation.navigate('FeedScreen', {selectedPhotoId: photo.id});
+    navigation.navigate('FeedScreen', {selectedPhotoId: photo.postId});
   };
 
   const renderPhotoGrid = () => {

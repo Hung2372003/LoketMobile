@@ -9,9 +9,13 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
-  StatusBar,
+  StatusBar, Platform,
 } from 'react-native';
 import { postService } from '../../services/postService';
+import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import RNFS from 'react-native-fs';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import Feather from '@react-native-vector-icons/feather';
 
 interface PhotoPreviewScreenProps {
   navigation: any;
@@ -27,7 +31,6 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
   const { photoUri, photoPath } = route.params;
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
-  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
   // Fix image URI - ensure it has proper file:// prefix
   const imageUri = photoUri.startsWith('file://') ? photoUri : `file://${photoUri}`;
@@ -35,13 +38,6 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
   console.log('Photo URI:', photoUri);
   console.log('Photo Path:', photoPath);
   console.log('Image URI for display:', imageUri);
-
-  // Mock friends data - bạn có thể lấy từ CameraService hoặc context
-  const friends = [
-    { id: '1', name: 'Tất cả', avatar: 'https://via.placeholder.com/40', selected: true },
-    { id: '2', name: 'Bin', avatar: 'https://via.placeholder.com/40', selected: false },
-    { id: '3', name: 'Hung', avatar: 'https://via.placeholder.com/40', selected: false },
-  ];
 
   const handlePost = async () => {
     if (isPosting) return;
@@ -82,12 +78,41 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
     navigation.goBack();
   };
 
-  const toggleFriendSelection = (friendId: string) => {
-    setSelectedFriends(prev =>
-      prev.includes(friendId)
-        ? prev.filter(id => id !== friendId)
-        : [...prev, friendId]
-    );
+  const handleDownload = async () => {
+    const requestStoragePermission = async () => {
+      if (Platform.OS === 'android') {
+        const permission = Platform.Version >= 33
+          ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+          : PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
+        const result = await request(permission);
+        return result === RESULTS.GRANTED;
+      }
+      return true;
+    };
+
+    const hasPermission = await requestStoragePermission();
+    if (!hasPermission) {
+      Alert.alert('Lỗi', 'Cần cấp quyền truy cập để lưu ảnh');
+      return;
+    }
+
+    try {
+      const timestamp = new Date().getTime();
+      const ext = photoUri.split('.').pop() || 'jpg';
+      const fileName = `locket_preview_${timestamp}.${ext}`;
+      const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      await RNFS.copyFile(imageUri, downloadPath);
+      await CameraRoll.saveAsset(downloadPath, {
+        type: 'photo',
+        album: 'Locket',
+      });
+
+      Alert.alert('Thành công', 'Ảnh đã được lưu vào thư viện');
+    } catch (error) {
+      console.log('Download error:', error);
+      Alert.alert('Lỗi', 'Không thể tải ảnh xuống. Vui lòng thử lại.');
+    }
   };
 
   return (
@@ -96,11 +121,15 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
 
       {/* Header */}
       <View style={styles.header}>
+        <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Gửi đến...</Text>
-        <TouchableOpacity onPress={handleClose} style={styles.downloadButton}>
-          <Text style={styles.downloadText}>↓</Text>
+        <TouchableOpacity onPress={handleDownload} style={styles.downloadButton}>
+          {/*<Text style={styles.downloadText}>↓</Text>*/}
+          <Feather name="download" size={24} style={styles.downloadText}/>
         </TouchableOpacity>
       </View>
+
+
 
       {/* Photo Preview */}
       <View style={styles.photoContainer}>
@@ -127,21 +156,13 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
             maxLength={200}
           />
         </View>
-
-        {/* Pagination dots */}
-        <View style={styles.paginationContainer}>
-          <View style={[styles.dot, styles.activeDot]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionContainer}>
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>✕</Text>
+          {/*<Text style={styles.closeButtonText}>✕</Text>*/}
+          <Feather name="x" size={24} color="#FFF"/>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -152,41 +173,13 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
           {isPosting ? (
             <ActivityIndicator size="small" color="#FFF" />
           ) : (
-            <Text style={styles.sendButtonText}>✈</Text>
+            <Feather name="send" color="#FFF" size={24}/>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.textButton}>
           <Text style={styles.textButtonText}>Aa</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Friends Selection */}
-      <View style={styles.friendsContainer}>
-        {friends.map((friend) => (
-          <TouchableOpacity
-            key={friend.id}
-            style={styles.friendItem}
-            onPress={() => toggleFriendSelection(friend.id)}
-          >
-            <View style={[
-              styles.friendAvatarContainer,
-              friend.id === '1' && styles.selectedFriend
-            ]}>
-              <View style={styles.friendAvatar}>
-                <Text style={styles.friendAvatarText}>
-                  {friend.id === '1' ? '👥' : friend.name.charAt(0)}
-                </Text>
-              </View>
-            </View>
-            <Text style={[
-              styles.friendName,
-              friend.id === '1' && styles.selectedFriendName
-            ]}>
-              {friend.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
       </View>
     </SafeAreaView>
   );
@@ -196,38 +189,51 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    gap: 30,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    justifyContent: 'space-between',
+    paddingHorizontal: 30,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 24 : 0,
+    paddingBottom: 15,
+    position: 'relative',
   },
   headerTitle: {
-    color: '#FFF',
-    fontSize: 18,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 24,
     fontWeight: '600',
+    color: '#FFF',
+    transform: [{translateY: 50}],
+  },
+  headerSpacer: {
+    width: 40,
   },
   downloadButton: {
-    width: 40,
-    height: 40,
+    width: 45,
+    height: 45,
     borderRadius: 20,
     backgroundColor: '#333',
     justifyContent: 'center',
     alignItems: 'center',
+    transform: [{translateY: 40}],
   },
   downloadText: {
     color: '#FFF',
     fontSize: 20,
   },
   photoContainer: {
-    flex: 1,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 30,
+    width: '95%',
+    height: '45%',
+    marginTop: '25%',
+    alignSelf: 'center',
+    borderRadius: 40,
     overflow: 'hidden',
-    position: 'relative',
+    backgroundColor: '#000',
   },
   photo: {
     width: '100%',
@@ -236,7 +242,7 @@ const styles = StyleSheet.create({
   },
   contentInputContainer: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 60,
     left: 20,
     right: 20,
   },
@@ -249,29 +255,11 @@ const styles = StyleSheet.create({
     minHeight: 50,
     maxHeight: 100,
   },
-  paginationContainer: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: '#FFF',
-  },
   actionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 50,
+    paddingHorizontal: 40,
     paddingBottom: 20,
   },
   closeButton: {
