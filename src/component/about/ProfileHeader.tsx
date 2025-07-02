@@ -39,17 +39,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Feather name="chevron-left" size={24} color="#e5e5e5" />
-        <View style={styles.profileImageContainer}>
-          <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          {isUploading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator color="#FFFFFF" />
-          </View>
-          )}
-        </View>
-        <Text style={styles.nameText}>{name}</Text>
-        <TouchableOpacity onPress={onEditPhoto} disabled={isUploading}>
-          <Text style={styles.editPhotoText}>Edit Photo</Text>
         </TouchableOpacity>
         <View style={styles.profileContent}>
           <View style={styles.profileImageContainer}>
@@ -99,7 +88,7 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 10,
     borderRadius: 25,
-    marginRight: -45, 
+    marginRight: -45,
     backgroundColor: 'rgba(255, 183, 0, 0.1)',
     alignSelf: 'flex-start',
   },

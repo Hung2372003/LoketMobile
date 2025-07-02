@@ -22,12 +22,18 @@ import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {postService} from '../../services/postService.ts';
-import authService from '../../services/authService.ts';
 import storage from '../../api/storage.ts';
 const { width, height } = Dimensions.get('window');
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
+import { chatManagementApi, PostManagementApi, UpdateMessageRequestData } from '../../api/endpoint.api.ts';
+import ChatService from '../../services/chat.service.ts';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigation';
+
+type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 
 type FeedScreenProps = {
   navigation: any;
@@ -49,7 +55,13 @@ type FeedScreenRouteParams = {
 };
 
 
+interface user {
+  id:number;
+  name:string;
+  avatar:string;
+}
 const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
+ const navigationChat = useNavigation<ChatHistoryNavigationProp>();
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
   const dispatch = useDispatch<AppDispatch>();
@@ -103,13 +115,13 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
 
   const handlePhotoTransition = () => {
     const transition = route?.params?.photoTransition;
-    if (!transition) return;
+    if (!transition) {return;}
 
     setIsTransitioning(true);
 
     // Tìm index của photo được click
     const targetIndex = feedData.findIndex(item => item.id === transition.photoId);
-    if (targetIndex === -1) return;
+    if (targetIndex === -1) {return;}
 
     // Set initial position và scale
     const startPos = transition.startPosition;
@@ -118,7 +130,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
 
     positionAnim.setValue({
       x: startPos.x + startPos.width / 2 - centerX,
-      y: startPos.y + startPos.height / 2 - centerY
+      y: startPos.y + startPos.height / 2 - centerY,
     });
 
     const initialScale = Math.min(startPos.width / width, startPos.height / height);
@@ -327,6 +339,46 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     setShowPopup(false);
   };
 
+
+  const openchat = async ( imageId:number,user:user,path:string,content?:string) => {
+    console.log(content,user,path);
+    try{
+       const data = await chatManagementApi.createChatBox({groupChatId:undefined,userCode:user.id});
+        console.log(data);
+        const file = await ChatService.downloadImageAsFile(path);
+        const updateMessageRequest : UpdateMessageRequestData = {
+          groupChatId: data.preventiveObject.groupChatId,
+          content: content,
+          file: [file],
+        };
+        const newList:Array<number> = [];
+        newList.push(user.id);
+        console.log(updateMessageRequest);
+        const newi =  await ChatService.updateMessage(updateMessageRequest);
+        console.log(newi);
+         navigationChat.navigate('ChatBox', {
+          groupChatId:data.preventiveObject.groupChatId,
+          groupAvatar:user.avatar,
+          groupName:user.name,
+          listUser:newList,
+         });
+    }catch(chatError){
+      throw chatError;
+    }
+
+    };
+
+
+    const feeling = async (feelingType: string, postId: number) => {
+      try{
+          const message = await PostManagementApi.FeelPost({ postCode: postId, feeling: feelingType });
+          console.log(message);
+      }catch(feelingError){
+        throw feelingError;
+      }
+
+
+    };
   if (loading && feedData.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -421,19 +473,19 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
             </View>
 
             <View style={styles.messageInputArea}>
-              <TouchableOpacity style={styles.messageInput}>
+              <TouchableOpacity onPress={()=> openchat(parseInt(item.id, 36),item.user,item.image,item.caption)} style={styles.messageInput}>
                 <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
+              <TouchableOpacity onPress={()=>feeling('💛',parseInt(item.id, 10))} style={styles.emojiButton}>
                 <Text style={styles.emoji}>💛</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
+              <TouchableOpacity onPress={()=>feeling('🔥',parseInt(item.id, 10))} style={styles.emojiButton}>
                 <Text style={styles.emoji}>🔥</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
+              <TouchableOpacity onPress={()=>feeling('😂',parseInt(item.id, 10))} style={styles.emojiButton}>
                 <Text style={styles.emoji}>😂</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.emojiButton}>
+              <TouchableOpacity onPress={()=>feeling('😍',parseInt(item.id, 10))} style={styles.emojiButton}>
                 <Text style={styles.emoji}>😍</Text>
               </TouchableOpacity>
             </View>

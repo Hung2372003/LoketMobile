@@ -6,8 +6,10 @@ export const ChatBoxStyles = StyleSheet.create({
         height:'100%',
         flex:1,
 
+
   },
   header:{
+    paddingTop:40,
     paddingLeft:10,
     paddingRight:10,
     flexGrow:0,
