@@ -33,6 +33,7 @@ import ChatService from '../../services/chat.service.ts';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
+import { onReceiveMessage } from '../../services/signalR.service.ts';
 
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 
@@ -87,7 +88,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [didNavigate, setDidNavigate] = useState(false);
   const [activityModalVisible, setActivityModalVisible] = useState(false);
   const [activityList, setActivityList] = useState<UserActivity[]>([]);
-
+  const [NotifiMess, setNotifiMess] = useState<number>();
 
     // Animation states cho transition
   const [transitionAnim] = useState(new Animated.Value(0));
@@ -118,6 +119,8 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   }, [dispatch]);
   // Handle navigation params khi component mount
   useEffect(() => {
+    getNotifi();
+    onReceiveMessage(getNotifi);
     if (
       selectedPhotoId &&
       feedData.length > 0 &&
@@ -401,7 +404,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     }
 
     };
-  
+
   const feeling = async (feelingType: string, postId: number) => {
       try{
           const message = await PostManagementApi.FeelPost({ postCode: postId, feeling: feelingType });
@@ -411,12 +414,21 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
       }
     };
 
-  const handleOpenActivityModal = () => {
-      const data: UserActivity[] = [
-          { id: 1, name: 'Nam', avatar: 'https://i.pravatar.cc/100', emoji: '💛' },
-          { id: 2, name: 'Huy', avatar: 'https://i.pravatar.cc/101', emoji: '🔥' },
-          { id: 3, name: 'Phúc', avatar: 'https://i.pravatar.cc/102', emoji: '😂' },
-      ];
+   const getNotifi = async ()=>{
+    const data = await chatManagementApi.getCountNewMessage();
+    setNotifiMess(data.count);
+   };
+  const handleOpenActivityModal = async (postId:number) => {
+
+      const reponse = await PostManagementApi.getFeelPost({postCode:postId});
+
+      let data: UserActivity[] = [];
+      reponse.object?.forEach((x,index)=>{
+        data[index].id = x.userCode;
+        data[index].name = x.name;
+        data[index].avatar = x.avatar;
+        data[index].emoji = x.feeling;
+      });
       setActivityList(data);
       setActivityModalVisible(true);
   };
@@ -428,7 +440,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         <TopBar
           centerText="Tất cả bạn bè"
           showDropdown={true}
-          notificationCount={3}
+          notificationCount={NotifiMess ?? 0}
           onProfilePress={handleProfilePress}
           onCenterPress={handleCenterPress}
           onMessagePress={handleMessagePress}
@@ -459,7 +471,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
       <TopBar
         centerText="Tất cả bạn bè"
         showDropdown={true}
-        notificationCount={3}
+        notificationCount={NotifiMess ?? 0}
         onProfilePress={handleProfilePress}
         onCenterPress={handleCenterPress}
         onMessagePress={handleMessagePress}
@@ -517,7 +529,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
             </View>
               {item.user.id === currentUserId ? (
                   <View style={styles.noActivityContainer}>
-                      <TouchableOpacity onPress={handleOpenActivityModal}>
+                      <TouchableOpacity onPress={() => handleOpenActivityModal(parseInt(item.id,36))}>
                           <Text style={styles.noActivityText}>✨ Chưa có hoạt động nào! (Xem hoạt động)</Text>
                       </TouchableOpacity>
                   </View>

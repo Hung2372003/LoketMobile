@@ -59,10 +59,11 @@ const flatListRef = useRef<FlatList>(null);
           }
         console.log(dataRequest);
         const data = await chatManagementApi.createChatBox(dataRequest);
+        await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
         console.log(dataRequest);
         console.log(data);
         const newGroupId = data?.preventiveObject?.groupChatId;
-        if (newGroupId != null && newGroupId != '') {
+        if (newGroupId != null && newGroupId !== '') {
           setGroupChatIdMain(newGroupId);
         }
 

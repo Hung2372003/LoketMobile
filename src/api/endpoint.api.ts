@@ -4,6 +4,9 @@ export const chatManagementApi = {
   newMessageAllGroup: (): Promise<ApiResponse<Array<MessageReponse>>> =>
     callApi<ApiResponse<Array<MessageReponse>>>('ActionMessage/GetAllMessageGroups', 'get'),
 
+  getCountNewMessage: (): Promise<{count:number}> =>
+    callApi<{count:number}>('ChatBox/GetUnreadMessageCount','get'),
+
   createChatBox: (data: ReqestChatBox): Promise<ApiResponse<object>> =>{
     return callApi<ApiResponse<object>>('ChatBox/CreateWindowChat', 'post', data);
   },
@@ -29,11 +32,14 @@ export const chatManagementApi = {
   getListFriend: ():Promise<Array<ListFriend>> =>
     callApi<Array<ListFriend>>('ContactUser/ListFrends','get'),
 
+
 };
 
 export const PostManagementApi = {
    FeelPost: (data: FeelPostRequest): Promise<ApiResponse<Array<MessageReponse>>> =>
     callApi<ApiResponse<Array<MessageReponse>>>('PostManagement/FeelPost', 'post',data),
+   getFeelPost : (data:{postCode : number}) : Promise<ApiResponse<Array<GetFeelPostReponse>>> =>
+    callApi<ApiResponse<Array<GetFeelPostReponse>>>('PostManagement/GetFeelPost','get',data),
 };
 
 export interface FeelPostRequest{
@@ -48,6 +54,12 @@ export interface ApiResponse<T>{
   preventiveObject:any
 }
 
+export interface GetFeelPostReponse{
+    userCode:number,
+    name:string,
+    avatar:string,
+    feeling:string,
+}
 export interface ReqestChatBox{
   groupChatId?:number,
   userCode?:number
