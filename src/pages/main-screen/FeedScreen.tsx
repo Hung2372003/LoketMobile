@@ -409,19 +409,17 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
       }catch(feelingError){
         throw feelingError;
       }
-
-
     };
 
-    const handleOpenActivityModal = () => {
-        const data: UserActivity[] = [
-            { id: 1, name: 'Nam', avatar: 'https://i.pravatar.cc/100', emoji: '💛' },
-            { id: 2, name: 'Huy', avatar: 'https://i.pravatar.cc/101', emoji: '🔥' },
-            { id: 3, name: 'Phúc', avatar: 'https://i.pravatar.cc/102', emoji: '😂' },
-        ];
-        setActivityList(data);
-        setActivityModalVisible(true);
-    };
+  const handleOpenActivityModal = () => {
+      const data: UserActivity[] = [
+          { id: 1, name: 'Nam', avatar: 'https://i.pravatar.cc/100', emoji: '💛' },
+          { id: 2, name: 'Huy', avatar: 'https://i.pravatar.cc/101', emoji: '🔥' },
+          { id: 3, name: 'Phúc', avatar: 'https://i.pravatar.cc/102', emoji: '😂' },
+      ];
+      setActivityList(data);
+      setActivityModalVisible(true);
+  };
 
 
     if (loading && feedData.length === 0) {

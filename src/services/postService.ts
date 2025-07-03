@@ -105,16 +105,6 @@ export const postService = {
       return response.data;
     } catch (error) {
       console.error('Error creating post:', error);
-
-      // // More detailed error logging
-      // if (error.response) {
-      //   console.error('Response error:', error.response.status, error.response.data);
-      // } else if (error.request) {
-      //   console.error('Request error:', error.request);
-      // } else {
-      //   console.error('Setup error:', error.message);
-      // }
-
       throw error;
     }
   },
