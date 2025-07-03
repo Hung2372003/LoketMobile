@@ -23,6 +23,7 @@ import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {postService} from '../../services/postService.ts';
 import storage from '../../api/storage.ts';
+import ActivityModal from '../../component/feed/ActivityModal.tsx';
 const { width, height } = Dimensions.get('window');
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
@@ -56,10 +57,18 @@ type FeedScreenRouteParams = {
 
 
 interface user {
-  id:number;
-  name:string;
-  avatar:string;
+  id: number;
+  name: string;
+  avatar: string;
 }
+
+interface UserActivity {
+    id: number;
+    name: string;
+    avatar: string;
+    emoji: string;
+}
+
 const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
  const navigationChat = useNavigation<ChatHistoryNavigationProp>();
   const { posts, loading, error, refreshing, refreshPosts } = usePosts();
@@ -76,8 +85,11 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [didNavigate, setDidNavigate] = useState(false);
+  const [activityModalVisible, setActivityModalVisible] = useState(false);
+  const [activityList, setActivityList] = useState<UserActivity[]>([]);
 
-  // Animation states cho transition
+
+    // Animation states cho transition
   const [transitionAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(1));
   const [positionAnim] = useState(new Animated.ValueXY({ x: 0, y: 0 }));
@@ -389,9 +401,8 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     }
 
     };
-
-
-    const feeling = async (feelingType: string, postId: number) => {
+  
+  const feeling = async (feelingType: string, postId: number) => {
       try{
           const message = await PostManagementApi.FeelPost({ postCode: postId, feeling: feelingType });
           console.log(message);
@@ -401,7 +412,19 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
 
 
     };
-  if (loading && feedData.length === 0) {
+
+    const handleOpenActivityModal = () => {
+        const data: UserActivity[] = [
+            { id: 1, name: 'Nam', avatar: 'https://i.pravatar.cc/100', emoji: '💛' },
+            { id: 2, name: 'Huy', avatar: 'https://i.pravatar.cc/101', emoji: '🔥' },
+            { id: 3, name: 'Phúc', avatar: 'https://i.pravatar.cc/102', emoji: '😂' },
+        ];
+        setActivityList(data);
+        setActivityModalVisible(true);
+    };
+
+
+    if (loading && feedData.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <TopBar
@@ -494,23 +517,35 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
                 <Text style={styles.timestamp}>{item.timestamp}</Text>
               </View>
             </View>
-            <View style={styles.messageInputArea}>
-              <TouchableOpacity onPress={()=> openchat(parseInt(item.id, 36),item.user,item.image,item.caption)} style={styles.messageInput}>
-                <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={()=>feeling('💛',parseInt(item.id, 10))} style={styles.emojiButton}>
-                <Text style={styles.emoji}>💛</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={()=>feeling('🔥',parseInt(item.id, 10))} style={styles.emojiButton}>
-                <Text style={styles.emoji}>🔥</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={()=>feeling('😂',parseInt(item.id, 10))} style={styles.emojiButton}>
-                <Text style={styles.emoji}>😂</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={()=>feeling('😍',parseInt(item.id, 10))} style={styles.emojiButton}>
-                <Text style={styles.emoji}>😍</Text>
-              </TouchableOpacity>
-            </View>
+              {item.user.id === currentUserId ? (
+                  <View style={styles.noActivityContainer}>
+                      <TouchableOpacity onPress={handleOpenActivityModal}>
+                          <Text style={styles.noActivityText}>✨ Chưa có hoạt động nào! (Xem hoạt động)</Text>
+                      </TouchableOpacity>
+                  </View>
+              ) : (
+                  <View style={styles.messageInputArea}>
+                      <TouchableOpacity
+                          onPress={() => openchat(parseInt(item.id, 36), item.user, item.image, item.caption)}
+                          style={styles.messageInput}
+                      >
+                          <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => feeling('💛', parseInt(item.id, 10))} style={styles.emojiButton}>
+                          <Text style={styles.emoji}>💛</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => feeling('🔥', parseInt(item.id, 10))} style={styles.emojiButton}>
+                          <Text style={styles.emoji}>🔥</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => feeling('😂', parseInt(item.id, 10))} style={styles.emojiButton}>
+                          <Text style={styles.emoji}>😂</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => feeling('😍', parseInt(item.id, 10))} style={styles.emojiButton}>
+                          <Text style={styles.emoji}>😍</Text>
+                      </TouchableOpacity>
+                  </View>
+              )}
+
           </View>
         ))}
       </PagerView>
@@ -553,6 +588,12 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           <Text style={styles.loadingText}>Đang tải ảnh...</Text>
         </View>
       )}
+
+      <ActivityModal
+        visible={activityModalVisible}
+        onClose={() => setActivityModalVisible(false)}
+        activities={activityList}
+      />
 
     </SafeAreaView>
   );
