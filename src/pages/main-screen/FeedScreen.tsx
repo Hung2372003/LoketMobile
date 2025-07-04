@@ -421,7 +421,6 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const handleOpenActivityModal = async (postId:number) => {
 
       const reponse = await PostManagementApi.getFeelPost({postCode:postId});
-
       let data: UserActivity[] = [];
       reponse.object?.forEach((x,index)=>{
         data[index].id = x.userCode;
