@@ -8,6 +8,7 @@ import { RootStackParamList } from '../../navigation/AppNavigation';
 import { useNavigation } from '@react-navigation/native';
 import ChatService from '../../services/chat.service';
 import { chatManagementApi, ListFriend, MessageReponse } from '../../api/endpoint.api';
+import { onReceiveMessage } from '../../services/signalR.service';
 
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 interface ListUser {
@@ -48,15 +49,18 @@ export const ChatHistory: React.FC = () => {
         console.error('Lỗi khi gọi API:', error);
       }
     };
-
     fetchChatHistory();
+    onReceiveMessage(fetchChatHistory);
   }, []);
 
-  const startNewChat = (friend: ListFriend) => {
+  const startNewChat = async (friend: ListFriend) => {
     goToChat(friend.userCode,undefined ,friend.path, friend.name,undefined);
   };
 
-  const goToChat = (userCode?:number, groupChatId?:number,groupAvatar?:string,groupName?:string,listUser?:Array<ListUser>)=>{
+  const goToChat = async (userCode?:number, groupChatId?:number,groupAvatar?:string,groupName?:string,listUser?:Array<ListUser>)=>{
+    if(groupChatId){
+      await chatManagementApi.setStatusMess(groupChatId);
+    }
     const newList:Array<number> = [];
     if(listUser){
       listUser.forEach(x => {
@@ -97,7 +101,7 @@ export const ChatHistory: React.FC = () => {
           const avatar = isMessage ? item.groupAvatar : item.path;
           const title = isMessage ? item.groupName : item.name;
           const content = isMessage ? item.newMessage?.content : 'Hãy bắt đầu trò chuyện';
-          const isRead = isMessage ? item.status : true;
+          const isRead = isMessage ? item.status : false;
           const time = isMessage ? ChatService.setDate(item.newMessage.createdTime) : undefined;
 
           return (

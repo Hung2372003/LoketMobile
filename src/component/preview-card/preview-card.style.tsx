@@ -5,9 +5,9 @@ import { PreviewCardTheme } from './preview-card.theme.interface';
 export const PreviewCardStyles = (theme: PreviewCardTheme) => {
   const {
     backgroundColor = '',
-    titleColor = 'white',
+    titleColor = '#ffffff',
     titleSize = 17,
-    contentColor = 'white',
+    contentColor = '#ffffff',
     contentApprovedColor = '#a5a5a5d6',
     borderOnlineDotColor = '#ffffff',
     avatarSize = 40,
