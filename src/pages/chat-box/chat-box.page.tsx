@@ -59,11 +59,11 @@ const flatListRef = useRef<FlatList>(null);
           }
         console.log(dataRequest);
         const data = await chatManagementApi.createChatBox(dataRequest);
-        await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
+        // await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
         console.log(dataRequest);
         console.log(data);
         const newGroupId = data?.preventiveObject?.groupChatId;
-        if (newGroupId != null && newGroupId !== '') {
+        if (newGroupId != null && newGroupId != '') {
           setGroupChatIdMain(newGroupId);
         }
 
@@ -118,8 +118,9 @@ const flatListRef = useRef<FlatList>(null);
     try {
       const submittedValue = text;
       setText('');
+      console.log(groupChatIdMain,submittedValue);
      await ChatService.updateMessage({ groupChatId: groupChatIdMain!, content: submittedValue });
-     console.log(groupChatIdMain,submittedValue);
+
     } catch (error) {
       console.error('Lỗi khi gửi tin nhắn:', error);
     }
