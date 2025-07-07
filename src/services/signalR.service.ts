@@ -51,6 +51,12 @@ export const SendNotificationToGroup = async (
   await connection.invoke('SendNotificationToGroup', groupId,notification);
 };
 
+export const onReceiveNotification = (
+  callback: (notification:string) => void
+) => {
+  connection.on('ReceiveNotification', callback);
+};
+
 export const onListUserOnline = (callback: (userCodes: string[]) => void) => {
   connection.on('ListUserOnline', callback);
 };
@@ -62,11 +68,6 @@ export const onReceiveMessage = (
   connection.on('ReceiveMessage', callback);
 };
 
-export const onReceiveNotification = (
-  callback: (notification:string) => void
-) => {
-  connection.on('ReceiveNotification', callback);
-};
 
 export const offReceiveMessage = (callback: (...args: any[]) => void) => {
   connection.off('ReceiveMessage', callback);
