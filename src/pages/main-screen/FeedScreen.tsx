@@ -115,12 +115,12 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
 
 
   React.useEffect(() => {
+    getNotifi();
+    onReceiveMessage(getNotifi);
     dispatch(fetchProfile());
   }, [dispatch]);
   // Handle navigation params khi component mount
   useEffect(() => {
-    getNotifi();
-    onReceiveMessage(getNotifi);
     if (
       selectedPhotoId &&
       feedData.length > 0 &&
@@ -381,7 +381,6 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     console.log(content,user,path);
     try{
        const data = await chatManagementApi.createChatBox({groupChatId:undefined,userCode:user.id});
-        console.log(data);
         const file = await ChatService.downloadImageAsFile(path);
         const updateMessageRequest : UpdateMessageRequestData = {
           groupChatId: data.preventiveObject.groupChatId,
@@ -390,9 +389,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         };
         const newList:Array<number> = [];
         newList.push(user.id);
-        console.log(updateMessageRequest);
-        const newi =  await ChatService.updateMessage(updateMessageRequest);
-        console.log(newi);
+        await ChatService.updateMessage(updateMessageRequest);
          navigationChat.navigate('ChatBox', {
           groupChatId:data.preventiveObject.groupChatId,
           groupAvatar:user.avatar,

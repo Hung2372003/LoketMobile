@@ -18,18 +18,15 @@ interface ListUser {
 }
 
 export const ChatHistory: React.FC = () => {
-
   const navigation = useNavigation<ChatHistoryNavigationProp>();
   const [message, setMessage] = useState<Array<MessageReponse>>([]); // bạn nên định nghĩa rõ type cho message nếu có
   const [friendNoMess, setFriendNoMess] = useState<Array<ListFriend>>([]);
   useEffect(() => {
-
     const fetchChatHistory = async () => {
       try {
         const data = await chatManagementApi.newMessageAllGroup();
         setMessage(data.object ?? []);
        const objectList = Array.isArray(data.object) ? data.object : [];
-
       // Lấy tất cả userCode từ listUser trong từng group (nếu có)
       const userCodesInMessageGroups = new Set(
         objectList.flatMap(group =>
@@ -38,13 +35,9 @@ export const ChatHistory: React.FC = () => {
             : []
         )
       );
-
-        const data2 : Array<ListFriend> = await chatManagementApi.getListFriend();
-
-       const filteredFriends = data2.filter(friend => !userCodesInMessageGroups.has(friend.userCode));
-
-        setFriendNoMess(filteredFriends);
-
+      const data2 : Array<ListFriend> = await chatManagementApi.getListFriend();
+      const filteredFriends = data2.filter(friend => !userCodesInMessageGroups.has(friend.userCode));
+      setFriendNoMess(filteredFriends);
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
@@ -58,7 +51,7 @@ export const ChatHistory: React.FC = () => {
   };
 
   const goToChat = async (userCode?:number, groupChatId?:number,groupAvatar?:string,groupName?:string,listUser?:Array<ListUser>)=>{
-    if(groupChatId){
+    if(groupChatId !== undefined && groupChatId !== null){
       await chatManagementApi.setStatusMess(groupChatId);
     }
     const newList:Array<number> = [];
@@ -97,7 +90,6 @@ export const ChatHistory: React.FC = () => {
         }}
         renderItem={({ item }) => {
           const isMessage = 'groupChatId' in item;
-
           const avatar = isMessage ? item.groupAvatar : item.path;
           const title = isMessage ? item.groupName : item.name;
           const content = isMessage ? item.newMessage?.content : 'Hãy bắt đầu trò chuyện';

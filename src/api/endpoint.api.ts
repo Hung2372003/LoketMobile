@@ -27,11 +27,13 @@ export const chatManagementApi = {
   },
 
   setStatusMess: (groupChatId:number): Promise<ApiResponse<object>> =>
-    callApi<ApiResponse<object>>('ChatBox/SetStatusMess', 'patch', groupChatId, true),
+    callApi<ApiResponse<object>>('ChatBox/SetStatusMess', 'patch', {groupChatId:groupChatId}, true),
 
   getListFriend: ():Promise<Array<ListFriend>> =>
     callApi<Array<ListFriend>>('ContactUser/ListFrends','get'),
 
+  getAllGroupChatId: ():Promise<ApiResponse<Array<{groupChatId:number}>>> =>
+    callApi<ApiResponse<Array<{groupChatId:number}>>>('ChatBox/GetAllGroupChatId','get'),
 
 };
 

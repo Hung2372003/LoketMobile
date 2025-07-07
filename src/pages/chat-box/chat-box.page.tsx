@@ -57,21 +57,21 @@ const flatListRef = useRef<FlatList>(null);
           if(groupChatIdMain){
             dataRequest.groupChatId = groupChatIdMain;
           }
-        console.log(dataRequest);
-        const data = await chatManagementApi.createChatBox(dataRequest);
-        // await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
-        console.log(dataRequest);
-        console.log(data);
-        const newGroupId = data?.preventiveObject?.groupChatId;
-        if (newGroupId != null && newGroupId != '') {
-          setGroupChatIdMain(newGroupId);
-        }
+          console.log(dataRequest);
+          const data = await chatManagementApi.createChatBox(dataRequest);
+          // await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
+          console.log(dataRequest);
+          console.log(data);
+          const newGroupId = data?.preventiveObject?.groupChatId;
+          if (newGroupId != null && newGroupId != '') {
+            setGroupChatIdMain(newGroupId);
+          }
 
-        // Nếu có object chứa tin nhắn, thì set lại
-        if (Array.isArray(data?.object) && data.object.length > 0) {
-          setMessage(data.object);
-        }
-              } catch (error) {
+          // Nếu có object chứa tin nhắn, thì set lại
+          if (Array.isArray(data?.object) && data.object.length > 0) {
+            setMessage(data.object);
+          }
+        } catch (error) {
         console.error('Lỗi khi lấy lịch sử chat:', error);
       }
     };
