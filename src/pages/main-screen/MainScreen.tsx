@@ -20,6 +20,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
 import { chatManagementApi } from '../../api/endpoint.api';
+import { onReceiveMessage } from '../../services/signalR.service';
 
 interface MainScreenProps {
   navigation: any;
@@ -47,6 +48,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
     dispatch(fetchProfile());
     loadInitialData();
+    onReceiveMessage(getNotifi);
     getNotifi();
   }, [dispatch]);
 
