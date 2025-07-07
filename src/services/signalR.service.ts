@@ -45,14 +45,10 @@ export const sendMessageToGroup = async (
 };
 
 export const SendNotificationToGroup = async (
-  groupChatId: string,
+  groupId: string,
   notification: string,
 ) => {
-  await connection.invoke('SendNotificationToGroup', groupChatId,notification);
-};
-
-export const sendLikeStatus = async (postId: number, like: boolean) => {
-  await connection.invoke('SendLikeStatus', postId, like);
+  await connection.invoke('SendNotificationToGroup', groupId,notification);
 };
 
 export const onListUserOnline = (callback: (userCodes: string[]) => void) => {
@@ -80,6 +76,10 @@ export const onReceiveLikeStatus = (
   callback: (postId: number, like: boolean) => void
 ) => {
   connection.on('ReceiveLikeStatus', callback);
+};
+
+export const sendLikeStatus = async (postId: number, like: boolean) => {
+  await connection.invoke('SendLikeStatus', postId, like);
 };
 
 
