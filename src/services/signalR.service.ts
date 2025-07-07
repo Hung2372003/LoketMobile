@@ -44,6 +44,13 @@ export const sendMessageToGroup = async (
   await connection.invoke('SendMessageToGroup', groupChatId, contents, listFile);
 };
 
+export const SendNotificationToGroup = async (
+  groupChatId: string,
+  notification: string,
+) => {
+  await connection.invoke('SendNotificationToGroup', groupChatId,notification);
+};
+
 export const sendLikeStatus = async (postId: number, like: boolean) => {
   await connection.invoke('SendLikeStatus', postId, like);
 };
@@ -59,6 +66,12 @@ export const onReceiveMessage = (
   connection.on('ReceiveMessage', callback);
 };
 
+export const onReceiveNotification = (
+  callback: (notification:string) => void
+) => {
+  connection.on('ReceiveNotification', callback);
+};
+
 export const offReceiveMessage = (callback: (...args: any[]) => void) => {
   connection.off('ReceiveMessage', callback);
 };
@@ -68,3 +81,5 @@ export const onReceiveLikeStatus = (
 ) => {
   connection.on('ReceiveLikeStatus', callback);
 };
+
+
