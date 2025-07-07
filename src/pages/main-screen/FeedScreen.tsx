@@ -417,14 +417,29 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
    };
   const handleOpenActivityModal = async (postId:number) => {
 
-      const reponse = await PostManagementApi.getFeelPost({postCode:postId});
+       const response = await PostManagementApi.getFeelPost({ postCode: postId });
       let data: UserActivity[] = [];
-      reponse.object?.forEach((x,index)=>{
-        data[index].id = x.userCode;
-        data[index].name = x.name;
-        data[index].avatar = x.avatar;
-        data[index].emoji = x.feeling;
-      });
+
+      if (response.object && response.object.length > 0) {
+        response.object.forEach((x) => {
+          data.push({
+            id: x.userCode,
+            name: x.name,
+            avatar: x.avatar,
+            emoji: x.feeling,
+          });
+        });
+      }
+      else{
+        data.push({
+          id:0,
+          name:'Chưa có hoạt động nào!',
+          avatar:'',
+          emoji:'',
+        });
+      }
+
+
       setActivityList(data);
       setActivityModalVisible(true);
   };
@@ -525,14 +540,14 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
             </View>
               {item.user.id === currentUserId ? (
                   <View style={styles.noActivityContainer}>
-                      <TouchableOpacity onPress={() => handleOpenActivityModal(parseInt(item.id,36))}>
-                          <Text style={styles.noActivityText}>✨ Chưa có hoạt động nào! (Xem hoạt động)</Text>
+                      <TouchableOpacity onPress={() => handleOpenActivityModal(parseInt(item.id,10))}>
+                          <Text style={styles.noActivityText}>✨Xem hoạt động</Text>
                       </TouchableOpacity>
                   </View>
               ) : (
                   <View style={styles.messageInputArea}>
                       <TouchableOpacity
-                          onPress={() => openchat(parseInt(item.id, 36), item.user, item.image, item.caption)}
+                          onPress={() => openchat(parseInt(item.id, 10), item.user, item.image, item.caption)}
                           style={styles.messageInput}
                       >
                           <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
