@@ -98,6 +98,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [activityList, setActivityList] = useState<UserActivity[]>([]);
   const [NotifiMess, setNotifiMess] = useState<number>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isSending, setIsSending] = useState(false);
   const [text, setText] = useState<string>('');
   const inputRef = useRef<TextInput>(null);
     // Animation states cho transition
@@ -412,6 +413,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const openchat = async ( imageId:number,user:user,path:string,content?:string,message?:string) => {
     console.log(content,user,path);
     try{
+      setIsSending(true);
        const data = await chatManagementApi.createChatBox({groupChatId:undefined,userCode:user.id});
         const file = await ChatService.downloadImageAsFile(path);
         const updateMessageRequest : UpdateMessageRequestData = {
@@ -433,7 +435,9 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           groupName:user.name,
           listUser:newList,
          });
+         setIsSending(false);
     }catch(chatError){
+      setIsSending(false);
       throw chatError;
     }
 
@@ -739,6 +743,12 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           </View>
         </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
+      )}
+      {isSending && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Đang gửi tin nhắn...</Text>
+        </View>
       )}
     </>
   );
