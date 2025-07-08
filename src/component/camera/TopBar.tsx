@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   friendsText: {
     color: '#FFF',
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: '600',
   },
   // Style cho feed mode
