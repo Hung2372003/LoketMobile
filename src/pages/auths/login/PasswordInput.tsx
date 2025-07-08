@@ -8,7 +8,9 @@ import ButtonBack from '../../../component/login/ButtonBack';
 import { RootStackParamList } from '../../../navigation/AppNavigation';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import authService from '../../../services/authService';
-import storage from '../../../api/storage'
+import storage from '../../../api/storage';
+import { connectToChatHub, joinGroup } from '../../../services/signalR.service';
+import { chatManagementApi } from '../../../api/endpoint.api';
 
 type PasswordInputRouteProps = RouteProp<RootStackParamList, 'PasswordInput'>;
 
@@ -38,7 +40,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
-    if (isLoading) return;
+    if (isLoading) {return;}
 
     setIsLoading(true);
     try {
@@ -46,7 +48,16 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
       await storage.storeTokens(token);
       await storage.storeUserId(userId);
-
+      await connectToChatHub();
+      await joinGroup('user_' + userId.toString());
+      let listFriend = await chatManagementApi.getListFriend();
+      let listGroupChatId = await chatManagementApi.getAllGroupChatId();
+      listGroupChatId.object?.forEach(async (x)=>{
+        await joinGroup('groupChat_' + x.groupChatId.toString());
+      });
+      listFriend.forEach(async (x) => {
+        await joinGroup('user_' + x.userCode.toString());
+      });
 //      Alert.alert(title);
       navigation.navigate('MainScreen');
     } catch (error) {
@@ -59,26 +70,26 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
   const handleForgetPassword = () => {
 
-    Alert.alert("Chưa làm!!")
+    Alert.alert('Chưa làm!!');
   };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={'height'}>
-      <View 
+      <View
         style={styles.container}
       >
           <ButtonBack onBackPage={handleBack} />
           <View style={{flex: 1}} />
           <AuthInput
             value= {password}
-            title='Điền mật khẩu của bạn' 
-            keyboardType='default' 
-            placeholder='Mật khẩu' 
+            title="Điền mật khẩu của bạn"
+            keyboardType="default"
+            placeholder="Mật khẩu"
             secureTextEntry = {true}
             onChangeText={setPassword}
           />
-          <Option 
-            title='Bạn đã quên mật khẩu?'
+          <Option
+            title="Bạn đã quên mật khẩu?"
             onChangeMethod={handleForgetPassword}
           />
           <View style={{flex: 1}} />

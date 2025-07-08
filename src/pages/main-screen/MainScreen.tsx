@@ -19,6 +19,8 @@ import { Friend } from '../../types/camera';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
+import { chatManagementApi } from '../../api/endpoint.api';
+import { onReceiveMessage } from '../../services/signalR.service';
 
 interface MainScreenProps {
   navigation: any;
@@ -36,14 +38,18 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isPhotoLoading, setIsPhotoLoading] = useState(false);
+  const [NotifiMess, setNotifiMess] = useState<number>();
 
   const device = cameraState.cameraPosition === 'front'
     ? devices.find(d => d.position === 'front')
     : devices.find(d => d.position === 'back');
 
   useEffect(() => {
+
     dispatch(fetchProfile());
     loadInitialData();
+    onReceiveMessage(getNotifi);
+    getNotifi();
   }, [dispatch]);
 
   const loadInitialData = async () => {
@@ -60,8 +66,12 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     }
   };
 
+    const getNotifi = async ()=>{
+      const data = await chatManagementApi.getCountNewMessage();
+      setNotifiMess(data.count);
+     };
   const handleTakePhoto = async () => {
-    if (!camera.current || isPhotoLoading) return;
+    if (!camera.current || isPhotoLoading) {return;}
 
     setIsPhotoLoading(true);
     try {
@@ -100,7 +110,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     // TODO: Navigate to history screen
     console.log('Navigate to history');
   };
-  
+
 
 
   // Loading state
@@ -150,7 +160,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
       <TopBar
         friends={friends}
-        notificationCount={notificationCount}
+        notificationCount={NotifiMess ?? 0}
         onProfilePress={handleProfilePress}
         onMessagePress={handleMessagePress}
         onCenterPress={handleCenterPress}

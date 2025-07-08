@@ -13,10 +13,10 @@ import {
   connectToChatHub,
   joinGroup,
   onReceiveMessage,
-  offReceiveMessage, // bạn cần thêm hàm này trong signalR.service.ts
-  sendMessageToGroup,
+  offReceiveMessage,
 } from '../../services/signalR.service';
 import { RootStackParamList } from '../../navigation/AppNavigation';
+import { chatManagementApi, ReqestChatBox } from '../../api/endpoint.api';
 
 type ChatBoxRouteProp = RouteProp<RootStackParamList, 'ChatBox'>;
 type ChatBoxNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatBox'>;
@@ -33,20 +33,58 @@ interface MessageType {
 export const ChatBox: React.FC = () => {
   const navigation = useNavigation<ChatBoxNavigationProp>();
   const route = useRoute<ChatBoxRouteProp>();
-  const { groupChatId, groupAvatar, groupName, listUser } = route.params;
+  const {userCode, groupChatId, groupAvatar, groupName, listUser } = route.params;
 
+  const [groupChatIdMain,setGroupChatIdMain] = useState<number>();
   const [message, setMessage] = useState<Array<MessageType>>([]);
   const [text, setText] = useState('');
 const flatListRef = useRef<FlatList>(null);
   useEffect(() => {
-    const handler = (_groupChatId: string, content: string, userCode: string, listFile: any[]) => {
+    // Khi nhận route -> set lại groupChatIdMain
+    if (groupChatId != null && groupChatId !== undefined) {
+      setGroupChatIdMain(groupChatId);
+    }
+  }, [groupChatId]);
+  useEffect( () => {
+  if (groupChatIdMain == null && userCode == null) {return;}
+    const fetchChatHistory = async () => {
+      try {
+
+          let dataRequest:ReqestChatBox = {};
+          if(userCode){
+            dataRequest.userCode = userCode;
+          }
+          if(groupChatIdMain){
+            dataRequest.groupChatId = groupChatIdMain;
+          }
+          console.log(dataRequest);
+          const data = await chatManagementApi.createChatBox(dataRequest);
+          // await chatManagementApi.setStatusMess(data.preventiveObject.groupChatId);
+          console.log(dataRequest);
+          console.log(data);
+          const newGroupId = data?.preventiveObject?.groupChatId;
+          if (newGroupId != null && newGroupId != '') {
+            setGroupChatIdMain(newGroupId);
+          }
+
+          // Nếu có object chứa tin nhắn, thì set lại
+          if (Array.isArray(data?.object) && data.object.length > 0) {
+            setMessage(data.object);
+          }
+        } catch (error) {
+        console.error('Lỗi khi lấy lịch sử chat:', error);
+      }
+    };
+    fetchChatHistory();
+    const handler = (_groupChatId: string, content: string, _userCode: string, listFile: any[]) => {
+      _groupChatId.replace(/groupChat_/gi, '');
       const safeListFile = Array.isArray(listFile) ? listFile : [];
       const messIdString = safeListFile[0]?.messId ?? Date.now().toString();
       const addMessage: MessageType = {
         id: parseInt(messIdString, 36) || Date.now(),
         content,
         createdTime: new Date(Date.now() - 7 * 60 * 60 * 1000).toString(),
-        createdBy: parseInt(userCode, 36),
+        createdBy: parseInt(_userCode, 36),
         listFile: safeListFile,
       };
 
@@ -55,33 +93,22 @@ const flatListRef = useRef<FlatList>(null);
 
     const setup = async () => {
       await connectToChatHub();
-      await joinGroup(groupChatId!.toString());
+      await joinGroup('groupChat_' + groupChatIdMain!.toString());
       onReceiveMessage(handler);
     };
 
     setup();
-
-    const fetchChatHistory = async () => {
-      try {
-        const data = await ChatService.createChatBox({ groupChatId });
-        setMessage(data);
-      } catch (error) {
-        console.error('Lỗi khi lấy lịch sử chat:', error);
-      }
-    };
-
-    fetchChatHistory();
-
     return () => {
-      offReceiveMessage(handler); // Gỡ listener khi component unmount
+      offReceiveMessage(handler);
     };
-  }, [groupChatId]);
+  }, [groupChatId, groupChatIdMain, userCode,route.params]);
 
-   useEffect(() => {
+  useEffect(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
   }, [message]);
+
   const typrMessage = (createdBy: number) => {
-    return !listUser?.includes(createdBy);
+     return !listUser?.includes(createdBy);
   };
 
   const submit = async () => {
@@ -91,8 +118,9 @@ const flatListRef = useRef<FlatList>(null);
     try {
       const submittedValue = text;
       setText('');
-      const data = await ChatService.updateMessage({ groupChatId: groupChatId!, content: submittedValue });
-      sendMessageToGroup(groupChatId!.toString(), submittedValue, data.object);
+      console.log(groupChatIdMain,submittedValue);
+     await ChatService.updateMessage({ groupChatId: groupChatIdMain!, content: submittedValue });
+
     } catch (error) {
       console.error('Lỗi khi gửi tin nhắn:', error);
     }
@@ -115,7 +143,7 @@ const flatListRef = useRef<FlatList>(null);
        ref={flatListRef}
         style={[styles.section]}
         data={message}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item,index) => index.toString()}
         renderItem={({ item, index }) => {
           const prev = message[index - 1];
           const next = message[index + 1];

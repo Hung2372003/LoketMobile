@@ -5,7 +5,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   ActivityIndicator,
 } from 'react-native';
 import Feather from '@react-native-vector-icons/feather';
@@ -18,6 +17,7 @@ interface ProfileHeaderProps {
   onShareLocket: () => void;
   isUploading?: boolean;
   onBack?: () => void;
+
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -32,13 +32,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.profileSection}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={onBack}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Feather name="chevron-left" size={24} color="#e5e5e5" />
-        </TouchableOpacity>
         <View style={styles.profileContent}>
           <View style={styles.profileImageContainer}>
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
@@ -53,6 +46,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <Text style={styles.editPhotoText}>Edit Photo</Text>
           </TouchableOpacity>
         </View>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={onBack}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Feather name="chevron-right" size={24} color="#e5e5e5" />
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.locketCard} onPress={onShareLocket}>
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 10,
     borderRadius: 25,
-    marginRight: -45, 
+    marginLeft: -45,
     backgroundColor: 'rgba(255, 183, 0, 0.1)',
     alignSelf: 'flex-start',
   },

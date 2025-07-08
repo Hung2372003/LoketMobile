@@ -18,6 +18,7 @@ import RegisterName from '../pages/auths/register/RegisterName.tsx';
 import PhotoPreviewScreen from '../pages/main-screen/PhotoPreviewScreen.tsx';
 export type RootStackParamList = {
   ChatBox: {
+    userCode?:number;
     groupChatId?: number;
     groupAvatar?:string;
     groupName?:string;

@@ -1,71 +1,15 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'https://chatapi-49ao.onrender.com/api',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxIiwicm9sZSI6IlVzZXIiLCJQZXJtaXNzaW9uIjoiTk9UIiwibmJmIjoxNzUxMTI4OTg5LCJleHAiOjE3NTEzODgxODksImlhdCI6MTc1MTEyODk4OX0.w19JnZeDvlB7-5lheArUPEAZiNASjC_rLOyd9AgUHoY',
-
-  },
-});
-
-
-const getChatHistory = async () => {
-    try {
-        const response = await api.get('/ActionMessage/GetAllMessageGroups');
-        if(response.data.error) {
-            throw new Error('Lỗi khi lấy thông tin profile.');
-        }
-        return response.data.object;
-    } catch (error) {
-        throw error;
-    }
-};
-
-interface ReqpestChatBox{
-  groupChatId?:number,
-  userCode?:number
-}
-const createChatBox = async (reqpestChatBox:ReqpestChatBox) => {
-   try {
-        const response = await api.post('/ChatBox/CreateWindowChat',reqpestChatBox);
-        if(response.data.error) {
-            throw new Error('Lỗi khi lấy thông tin profile.');
-        }
-        return response.data.object;
-    } catch (error) {
-        throw error;
-    }
-};
-
-
-export interface UpdateMessageRequestData {
-  groupChatId: number;
-  content?: string;
-  file?:Array<File>
-}
-
-
+import { ApiResponse, chatManagementApi, UpdateMessageRequestData, UpdateMessReponse } from '../api/endpoint.api';
+import { sendMessageToGroup } from './signalR.service';
+import RNFS from 'react-native-fs';
+import { Platform } from 'react-native';
 const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) => {
-  const requestUpdateMessage = new FormData();
-  requestUpdateMessage.append('groupChatId',updateMessageRequestData.groupChatId);
-  requestUpdateMessage.append('content',updateMessageRequestData.content);
-  if(updateMessageRequestData.file){
-    updateMessageRequestData.file.forEach(x => {
-      requestUpdateMessage.append('fileUpload',x);
-    });
-  }
      try {
-        const response = await api.post('/ChatBox/UpdateMessage',requestUpdateMessage,{
-          headers:{
-             'Authorization': api.defaults.headers.Authorization,
-              'Content-Type': 'multipart/form-data',
-          },
-        });
-        if(response.data.error) {
+        const data : ApiResponse<Array<UpdateMessReponse>> = await chatManagementApi.updateMessage(updateMessageRequestData);
+        await sendMessageToGroup('groupChat_' + updateMessageRequestData.groupChatId.toString(),updateMessageRequestData.content,data.object);
+        if(data.error) {
             throw new Error('Lỗi khi lấy thông tin profile.');
         }
-        return response.data;
+        return data.object;
     } catch (error) {
         throw error;
     }
@@ -139,16 +83,46 @@ function formatDateTime(input: string | Date): string {
     return vnTime.toLocaleDateString('vi-VN');
   }
 }
+async function downloadImageAsFile(url: string): Promise<{
+  uri: string;
+  name: string;
+  type: string;
+}> {
+  try {
+    // Lấy tên file từ URL
+    const urlParts = url.split('/');
+    const rawFilename = urlParts[urlParts.length - 1].split('?')[0]; // loại bỏ query string nếu có
+    const extension = rawFilename.split('.').pop() || 'jpg';
+    const filename = rawFilename || `image_${Date.now()}.${extension}`;
 
+    const path = `${RNFS.TemporaryDirectoryPath}/${filename}`;
 
+    const result = await RNFS.downloadFile({
+      fromUrl: url,
+      toFile: path,
+    }).promise;
+
+    if (result.statusCode !== 200) {
+      throw new Error('Download failed');
+    }
+
+    return {
+      uri: Platform.OS === 'android' ? `file://${path}` : path,
+      name: filename,
+      type: `image/${extension}`,
+    };
+  } catch (error) {
+    console.error('❌ Failed to download image:', error);
+    throw error;
+  }
+}
 
 const ChatService = {
-  getChatHistory,
-  createChatBox,
   setDate,
   setDateMessage,
   formatDateTime,
   updateMessage,
+  downloadImageAsFile,
 };
 
 export default ChatService;

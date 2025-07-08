@@ -7,6 +7,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
 import { useNavigation } from '@react-navigation/native';
 import ChatService from '../../services/chat.service';
+import { chatManagementApi, ListFriend, MessageReponse } from '../../api/endpoint.api';
+import { onReceiveMessage } from '../../services/signalR.service';
 
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 interface ListUser {
@@ -14,46 +16,54 @@ interface ListUser {
     name:string,
     avatar:string,
 }
-interface Message {
-  groupChatId: number;
-  groupName: string;
-  groupAvatar: string;
-  status?: boolean;
-  listUser:Array<ListUser>,
-  newMessage:{
-    id:number,
-    content:string,
-    createdBy:number,
-    createdTime:string,
-  }
-}
 
 export const ChatHistory: React.FC = () => {
-
   const navigation = useNavigation<ChatHistoryNavigationProp>();
-  const [message, setMessage] = useState<Array<Message>>([]); // bạn nên định nghĩa rõ type cho message nếu có
-
+  const [message, setMessage] = useState<Array<MessageReponse>>([]); // bạn nên định nghĩa rõ type cho message nếu có
+  const [friendNoMess, setFriendNoMess] = useState<Array<ListFriend>>([]);
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        console.log('Gọi API getChatHistory...');
-        const data = await ChatService.getChatHistory();
-        console.log('Dữ liệu chat:', data);
-        setMessage(data);
+        const data = await chatManagementApi.newMessageAllGroup();
+        setMessage(data.object ?? []);
+       const objectList = Array.isArray(data.object) ? data.object : [];
+      // Lấy tất cả userCode từ listUser trong từng group (nếu có)
+      const userCodesInMessageGroups = new Set(
+        objectList.flatMap(group =>
+          Array.isArray(group.listUser)
+            ? group.listUser.map(user => user.userCode)
+            : []
+        )
+      );
+      const data2 : Array<ListFriend> = await chatManagementApi.getListFriend();
+      const filteredFriends = data2.filter(friend => !userCodesInMessageGroups.has(friend.userCode));
+      setFriendNoMess(filteredFriends);
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
     };
-
     fetchChatHistory();
+    onReceiveMessage(fetchChatHistory);
   }, []);
 
-  const goToChat = (groupChatId:number,groupAvatar:string,groupName:string,listUser:Array<ListUser>)=>{
+  const startNewChat = async (friend: ListFriend) => {
+    goToChat(friend.userCode,undefined ,friend.path, friend.name,undefined);
+  };
+
+  const goToChat = async (userCode?:number, groupChatId?:number,groupAvatar?:string,groupName?:string,listUser?:Array<ListUser>)=>{
+    if(groupChatId !== undefined && groupChatId !== null){
+      await chatManagementApi.setStatusMess(groupChatId);
+    }
     const newList:Array<number> = [];
-    listUser.forEach(x => {
-      newList.push(x.userCode);
-    });
+    if(listUser){
+      listUser.forEach(x => {
+        newList.push(x.userCode);
+      });
+    }else{
+      newList.push(userCode!);
+    }
      navigation.navigate('ChatBox', {
+      userCode:userCode,
       groupChatId:groupChatId,
       groupAvatar:groupAvatar,
       groupName:groupName,
@@ -71,25 +81,43 @@ export const ChatHistory: React.FC = () => {
           </TouchableOpacity>
           <Text style={[styles.text]}>Tin Nhắn</Text>
       </View>
-      <FlatList
-        data={message}
-        keyExtractor={item => item.groupChatId.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-          onPress={ () => goToChat(item.groupChatId,item.groupAvatar,item.groupName,item.listUser)}
-            style={styles.card}
-          >
-            <PreviewCard
-              avatar={item.groupAvatar}
-              title={item.groupName}
-              content={item.newMessage.content}
-              isRead={item.status}
-              time={ChatService.setDate(item.newMessage.createdTime)}
-              theme={previewCardTheme}
-             />
-          </TouchableOpacity>
-        )}
+     <FlatList
+        data={[...message, ...friendNoMess]}
+        keyExtractor={(item, index) => {
+          return 'groupChatId' in item
+            ? `msg-${item.groupChatId}`
+            : `friend-${item.userCode ?? index}`;
+        }}
+        renderItem={({ item }) => {
+          const isMessage = 'groupChatId' in item;
+          const avatar = isMessage ? item.groupAvatar : item.path;
+          const title = isMessage ? item.groupName : item.name;
+          const content = isMessage ? item.newMessage?.content : 'Hãy bắt đầu trò chuyện';
+          const isRead = isMessage ? item.status : false;
+          const time = isMessage ? ChatService.setDate(item.newMessage.createdTime) : undefined;
+
+          return (
+            <TouchableOpacity
+              onPress={() =>
+                isMessage
+                  ? goToChat(undefined,item.groupChatId, item.groupAvatar, item.groupName, item.listUser)
+                  : startNewChat(item)
+              }
+              style={styles.card}
+            >
+              <PreviewCard
+                avatar={avatar}
+                title={title}
+                content={content}
+                isRead={isRead}
+                time={time}
+                theme={previewCardTheme}
+              />
+            </TouchableOpacity>
+          );
+        }}
       />
+
     </View>
   );
 };

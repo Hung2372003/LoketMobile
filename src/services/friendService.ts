@@ -79,6 +79,15 @@ const removeFriend = async (friendCode: number) => {
   }
 };
 
+const getListFriends = async () => {
+  try {
+    const response = await axiosInstance.get('/api/ContactUser/ListFriends');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const friendService = {
   getFriends,
   getFriendRequests,
@@ -86,6 +95,7 @@ const friendService = {
   sendFriendRequest,
   acceptFriendRequest,
   removeFriend,
+  getListFriends,
 };
 
 export default friendService;
