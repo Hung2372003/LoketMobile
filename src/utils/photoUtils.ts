@@ -16,6 +16,8 @@ export const convertPostsToPhotos = (posts: Post[]): PhotoItem[] => {
   const photos: PhotoItem[] = [];
 
   posts.forEach(post => {
+    if(post.name === 'Admin') return;
+
     if (post.listFile && post.listFile.length > 0) {
       post.listFile.forEach(file => {
         // Only include image files

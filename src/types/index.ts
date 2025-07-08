@@ -1,7 +1,7 @@
 export interface MenuItemType {
   id: string;
   title: string;
-  icon: string;
+  icon: any;
   onPress: () => void;
   isToggle?: boolean;
   isToggled?: boolean;

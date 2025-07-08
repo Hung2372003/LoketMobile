@@ -98,6 +98,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [activityList, setActivityList] = useState<UserActivity[]>([]);
   const [NotifiMess, setNotifiMess] = useState<number>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isSending, setIsSending] = useState(false);
   const [text, setText] = useState<string>('');
   const inputRef = useRef<TextInput>(null);
     // Animation states cho transition
@@ -409,9 +410,10 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   };
 
 
-  const openchat = async ( imageId:number,user:user,path:string,content?:string) => {
+  const openchat = async ( imageId:number,user:user,path:string,content?:string,message?:string) => {
     console.log(content,user,path);
     try{
+      setIsSending(true);
        const data = await chatManagementApi.createChatBox({groupChatId:undefined,userCode:user.id});
         const file = await ChatService.downloadImageAsFile(path);
         const updateMessageRequest : UpdateMessageRequestData = {
@@ -422,13 +424,20 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         const newList:Array<number> = [];
         newList.push(user.id);
         await ChatService.updateMessage(updateMessageRequest);
+        const updateMessageRequest2 : UpdateMessageRequestData = {
+          groupChatId: data.preventiveObject.groupChatId,
+          content: message,
+         };
+        await ChatService.updateMessage(updateMessageRequest2);
          navigationChat.navigate('ChatBox', {
           groupChatId:data.preventiveObject.groupChatId,
           groupAvatar:user.avatar,
           groupName:user.name,
           listUser:newList,
          });
+         setIsSending(false);
     }catch(chatError){
+      setIsSending(false);
       throw chatError;
     }
 
@@ -716,6 +725,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
                             parseInt(feedData[currentIndex].id, 10),
                             feedData[currentIndex].user,
                             feedData[currentIndex].image,
+                            feedData[currentIndex].caption,
                             text
                           );
                           setText('');
@@ -733,6 +743,12 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
           </View>
         </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
+      )}
+      {isSending && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Đang gửi tin nhắn...</Text>
+        </View>
       )}
     </>
   );

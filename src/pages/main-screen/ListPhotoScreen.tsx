@@ -58,7 +58,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
   };
 
   const handleCenterPress = () => {
-    // navigation?.navigate('CenterScreen');
+    navigation?.navigate('MainScreen');
   };
 
   const handleMessagePress = () => {
@@ -192,7 +192,7 @@ const ListPhotoScreen: React.FC<ListPhotoScreenProps> = ({
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.cameraButton}
-          onPress={onCapturePress}
+          onPress={() => navigation.navigate('MainScreen')}
         >
           <View style={styles.cameraButtonInner} />
         </TouchableOpacity>

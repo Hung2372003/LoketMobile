@@ -8,6 +8,7 @@ import {
 import {NativeStackNavigationProp} from 'react-native-screens/native-stack';
 import {RootStackParamList} from '../../navigation/AppNavigation.tsx';
 import {useNavigation} from '@react-navigation/native';
+import Feather from '@react-native-vector-icons/feather';
 
 interface HistorySectionProps {
   onHistoryPress: () => void;
@@ -26,7 +27,8 @@ const HistorySection: React.FC<HistorySectionProps> = () => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.historyButton} onPress={handleHistoryPress}>
         <Text style={styles.historyText}>Lịch sử</Text>
-        <Text style={styles.historyIcon}>⌄</Text>
+        {/*<Text style={styles.historyIcon}>⌄</Text>*/}
+        icon: <Feather name="chevron-down" size={22} color={'#FFF'}/>,
       </TouchableOpacity>
     </View>
   );
@@ -48,8 +50,8 @@ const styles = StyleSheet.create({
   },
   historyText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 22,
+    fontWeight: '600',
     marginBottom: 5,
   },
   historyIcon: {
