@@ -409,7 +409,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   };
 
 
-  const openchat = async ( imageId:number,user:user,path:string,content?:string) => {
+  const openchat = async ( imageId:number,user:user,path:string,content?:string,message?:string) => {
     console.log(content,user,path);
     try{
        const data = await chatManagementApi.createChatBox({groupChatId:undefined,userCode:user.id});
@@ -422,6 +422,11 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         const newList:Array<number> = [];
         newList.push(user.id);
         await ChatService.updateMessage(updateMessageRequest);
+        const updateMessageRequest2 : UpdateMessageRequestData = {
+          groupChatId: data.preventiveObject.groupChatId,
+          content: message,
+         };
+        await ChatService.updateMessage(updateMessageRequest2);
          navigationChat.navigate('ChatBox', {
           groupChatId:data.preventiveObject.groupChatId,
           groupAvatar:user.avatar,
@@ -716,6 +721,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
                             parseInt(feedData[currentIndex].id, 10),
                             feedData[currentIndex].user,
                             feedData[currentIndex].image,
+                            feedData[currentIndex].caption,
                             text
                           );
                           setText('');
