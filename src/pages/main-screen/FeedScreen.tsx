@@ -10,7 +10,12 @@ import {
   ActivityIndicator,
   Animated,
   Alert,
-  Platform, InteractionManager,
+  Platform,
+  InteractionManager,
+  TextInput,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import TopBar from '../../component/camera/TopBar';
@@ -34,6 +39,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
 import { onReceiveMessage } from '../../services/signalR.service.ts';
+import Feather from '@react-native-vector-icons/feather';
 
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 
@@ -89,7 +95,9 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [activityModalVisible, setActivityModalVisible] = useState(false);
   const [activityList, setActivityList] = useState<UserActivity[]>([]);
   const [NotifiMess, setNotifiMess] = useState<number>();
-
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [text, setText] = useState<string>('');
+  const inputRef = useRef<TextInput>(null);
     // Animation states cho transition
   const [transitionAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(1));
@@ -103,6 +111,27 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
     fetchUserId();
   }, []);
 
+  useEffect(() => {
+    if (isTyping && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isTyping]);
+
+  useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setIsTyping(false);
+        setText('');
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   // Convert và giữ nguyên data
   useEffect(() => {
@@ -114,7 +143,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   }, [posts]);
 
 
-  React.useEffect(() => {
+  useEffect(() => {
     getNotifi();
     onReceiveMessage(getNotifi);
     dispatch(fetchProfile());
@@ -478,6 +507,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   }
 
   return (
+    <>
     <SafeAreaView style={styles.container}>
       <TopBar
         centerText="Tất cả bạn bè"
@@ -538,34 +568,41 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
                 <Text style={styles.timestamp}>{item.timestamp}</Text>
               </View>
             </View>
-              {item.user.id === currentUserId ? (
-                  <View style={styles.noActivityContainer}>
-                      <TouchableOpacity onPress={() => handleOpenActivityModal(parseInt(item.id,10))}>
-                          <Text style={styles.noActivityText}>✨Xem hoạt động</Text>
-                      </TouchableOpacity>
-                  </View>
-              ) : (
-                  <View style={styles.messageInputArea}>
-                      <TouchableOpacity
-                          onPress={() => openchat(parseInt(item.id, 10), item.user, item.image, item.caption)}
-                          style={styles.messageInput}
-                      >
-                          <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => feeling('💛', parseInt(item.id, 10))} style={styles.emojiButton}>
-                          <Text style={styles.emoji}>💛</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => feeling('🔥', parseInt(item.id, 10))} style={styles.emojiButton}>
-                          <Text style={styles.emoji}>🔥</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => feeling('😂', parseInt(item.id, 10))} style={styles.emojiButton}>
-                          <Text style={styles.emoji}>😂</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => feeling('😍', parseInt(item.id, 10))} style={styles.emojiButton}>
-                          <Text style={styles.emoji}>😍</Text>
-                      </TouchableOpacity>
-                  </View>
-              )}
+            {item.user.id === currentUserId ? (
+              <View style={styles.noActivityContainer}>
+                <TouchableOpacity onPress={() => handleOpenActivityModal(parseInt(item.id,10))}>
+                  <Text style={styles.noActivityText}>✨Xem hoạt động</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              !isTyping ? (
+                <View style={styles.messageInputArea}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsTyping(true);
+                      setTimeout(() => {
+                        inputRef.current?.focus();
+                      }, 50);
+                    }}
+                    style={styles.messageInput}
+                  >
+                    <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => feeling('💛', parseInt(item.id, 10))} style={styles.emojiButton}>
+                    <Text style={styles.emoji}>💛</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => feeling('🔥', parseInt(item.id, 10))} style={styles.emojiButton}>
+                    <Text style={styles.emoji}>🔥</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => feeling('😂', parseInt(item.id, 10))} style={styles.emojiButton}>
+                    <Text style={styles.emoji}>😂</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => feeling('😍', parseInt(item.id, 10))} style={styles.emojiButton}>
+                    <Text style={styles.emoji}>😍</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            )}
 
           </View>
         ))}
@@ -615,8 +652,65 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         onClose={() => setActivityModalVisible(false)}
         activities={activityList}
       />
-
     </SafeAreaView>
+      {isTyping && (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.overlayContainer}
+        >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            Keyboard.dismiss();
+            setIsTyping(false);
+            setText('');
+          }}
+        >
+          <View style={styles.overlayInner}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.footer}>
+                <View style={styles.sendContainer}>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      ref={inputRef}
+                      style={styles.input}
+                      placeholder="Gửi tin nhắn..."
+                      placeholderTextColor="#ccc"
+                      value={text}
+                      onChangeText={setText}
+                      multiline
+                      textAlignVertical="top"
+                      blurOnSubmit={false}
+                      returnKeyType="default"
+                    />
+                  </View>
+                  <View style={styles.sendButton}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => {
+                        if (text.trim()) {
+                          openchat(
+                            parseInt(feedData[currentIndex].id, 10),
+                            feedData[currentIndex].user,
+                            feedData[currentIndex].image,
+                            text
+                          );
+                          setText('');
+                          setIsTyping(false);
+                          Keyboard.dismiss();
+                        }
+                      }}
+                    >
+                      <Feather name="send" size={28} color={'#232323d6'} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      )}
+    </>
   );
 };
 
@@ -880,6 +974,85 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  footer: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+    borderRadius: 23,
+    marginLeft: 13,
+    marginRight: 13,
+    minHeight: 50,
+    maxHeight: '60%',
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+
+  sendContainer: {
+    backgroundColor: '#363636d1',
+    borderRadius: 26,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+
+  inputContainer: {
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+  },
+
+  input: {
+    width: '100%',
+    color: 'white',
+    paddingTop: 17,
+    paddingLeft: 23,
+    paddingBottom: 17,
+    paddingRight: 10,
+    fontSize: 17,
+    fontWeight: '500',
+    alignItems: 'center',
+    flexDirection: 'row',
+    textAlignVertical: 'center',
+  },
+
+  sendButton: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 45,
+    aspectRatio: 1 / 1,
+    backgroundColor: '#d3d3d36e',
+    marginRight: 7,
+    marginBottom: 6,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  button: {},
+
+  footerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-end',
+  },
+  overlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-end',
+    zIndex: 999,
+  },
+  overlayInner: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });
 

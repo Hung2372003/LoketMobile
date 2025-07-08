@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Friend } from '../../types/camera';
 import Feather from '@react-native-vector-icons/feather';
+import friendService from '../../services/friendService';
 
 interface TopBarProps {
   friends?: Friend[];
@@ -23,23 +24,24 @@ interface TopBarProps {
   profileImage?: string ;
 }
 
+
+
 const TopBar: React.FC<TopBarProps> = ({
-                                         friends = [],
+                                         friends= [],
                                          notificationCount,
                                          onProfilePress,
                                          onMessagePress,
                                          mode = 'camera',
-                                         centerText,
                                          showDropdown = false,
                                          onCenterPress,
                                          profileImage,
                                        }) => {
-  const onlineFriendsCount = friends.filter(friend => friend.isOnline).length;
+  const friendCount = friends.length;
 
   const getCenterText = () => {
-    if (centerText) return centerText;
+    // if (centerText) return centerText;
     if (mode === 'feed') return 'Tất cả bạn bè';
-    return `${onlineFriendsCount} Bạn bè`;
+    return `${friendCount} Bạn bè`;
   };
 
   const renderCenterSection = () => {
