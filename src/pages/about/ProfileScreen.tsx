@@ -21,6 +21,7 @@ import { launchImageLibrary } from 'react-native-image-picker'; // Thư viện c
 import { Text } from 'react-native-gesture-handler';
 import userService from '../../services/userService.ts';
 import storage from '../../api/storage'
+import Feather from '@react-native-vector-icons/feather';
 
 interface ProfileScreenProps {
   navigation: any; // Replace with proper navigation type
@@ -124,19 +125,19 @@ const handleEditName = () => {
         {
           id: '1',
           title: 'Thêm Tiện ích',
-          icon: '+',
+          icon: <Feather name="plus" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Add widget'),
         },
         {
           id: '2',
           title: 'Cách thêm tiện ích',
-          icon: '?',
+          icon: <Feather name="help-circle" size={22} color={'#FFF'}/>,
           onPress: () => console.log('How to add widget'),
         },
         {
           id: '3',
           title: 'Chuỗi trên tiện ích',
-          icon: '🏠',
+          icon: <Feather name="home" size={22} color={'#FFF'}/> ,
           onPress: () => setConvenientMode(!convenientMode),
           isToggle: true,
           isToggled: convenientMode,
@@ -149,19 +150,19 @@ const handleEditName = () => {
         {
           id: '4',
           title: 'Sửa tên',
-          icon: '👤',
+          icon: <Feather name="user" size={22} color={'#FFF'}/>,
           onPress: () => setIsEditNameModalVisible(true),
         },
         {
           id: '5',
           title: 'Thay đổi số điện thoại',
-          icon: '📞',
+          icon: <Feather name="phone" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Change phone'),
         },
         {
           id: '6',
           title: 'Thay đổi địa chỉ email',
-          icon: '✉️',
+          icon: <Feather name="mail" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Change email'),
         },
       ],
@@ -172,7 +173,7 @@ const handleEditName = () => {
         {
           id: '7',
           title: 'Gửi đề xuất',
-          icon: '+',
+          icon: <Feather name="plus" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Send suggestion'),
         },
         {
@@ -189,7 +190,7 @@ const handleEditName = () => {
         {
           id: '9',
           title: 'Hiển thị tài khoản',
-          icon: '👁',
+          icon: <Feather name="eye" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Show account'),
         },
       ],
@@ -200,43 +201,43 @@ const handleEditName = () => {
         {
           id: '10',
           title: 'TikTok',
-          icon: '🎵',
+          icon: <Feather name="music" size={22} color={'#FFF'}/>,
           onPress: () => console.log('TikTok'),
         },
         {
           id: '11',
           title: 'Instagram',
-          icon: '📷',
+          icon: <Feather name="camera" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Instagram'),
         },
         {
           id: '12',
           title: 'X (Twitter)',
-          icon: '🐦',
+          icon: <Feather name="twitter" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Twitter'),
         },
         {
           id: '13',
           title: 'Chia sẻ Locket',
-          icon: '🔗',
+          icon: <Feather name="link" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Share Locket'),
         },
         {
           id: '14',
           title: 'Đánh giá Locket',
-          icon: '⭐',
+          icon: <Feather name="star" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Rate Locket'),
         },
         {
           id: '15',
           title: 'Điều khoản dịch vụ',
-          icon: '📄',
+          icon: <Feather name="file-text" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Terms of service'),
         },
         {
           id: '16',
           title: 'Chính sách quyền riêng tư',
-          icon: '🔒',
+          icon: <Feather name="lock" size={22} color={'#FFF'}/>,
           onPress: () => console.log('Privacy policy'),
         },
       ],
@@ -247,7 +248,7 @@ const handleEditName = () => {
         {
           id: '17',
           title: 'Xóa tài khoản',
-          icon: '🗑',
+          icon: <Feather name="alert-octagon" size={22} color={'#FFF'}/>,
           onPress: () => {
             Alert.alert(
               'Xóa tài khoản',
@@ -263,7 +264,7 @@ const handleEditName = () => {
         {
           id: '18',
           title: 'Đăng xuất',
-          icon: '👋',
+          icon: <Feather name="log-out" size={22} color={'#FFF'}/>,
           onPress: () => {
             Alert.alert(
               'Đăng xuất',

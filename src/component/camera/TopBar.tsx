@@ -54,7 +54,8 @@ const TopBar: React.FC<TopBarProps> = ({
         >
           <Text style={styles.centerText}>{getCenterText()}</Text>
           {showDropdown && (
-            <Text style={styles.dropdownIcon}>▼</Text>
+            // <Text style={styles.dropdownIcon}>▼</Text>
+            <Feather name="chevron-down" size={22} color={'#FFF'}/>
           )}
         </TouchableOpacity>
       );
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   },
   friendsText: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: '600',
   },
   // Style cho feed mode
