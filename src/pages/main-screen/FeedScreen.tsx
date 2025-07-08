@@ -40,6 +40,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigation';
 import { onReceiveMessage } from '../../services/signalR.service.ts';
 import Feather from '@react-native-vector-icons/feather';
+import FlyingEmoji from '../../component/feed/FlyingEmoji.tsx';
+import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
 
 type ChatHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatHistory'>;
 
@@ -102,6 +104,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
   const [transitionAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(1));
   const [positionAnim] = useState(new Animated.ValueXY({ x: 0, y: 0 }));
+  const [flyingEmoji, setFlyingEmoji] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -473,8 +476,24 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
       setActivityModalVisible(true);
   };
 
+  const handleFeeling = (emoji: string, postId: number) => {
+    feeling(emoji, postId);
+    setFlyingEmoji((prev) => [...prev, emoji]);
+    setTimeout(() => {
+      setFlyingEmoji((prev) => prev.slice(1));
+    }, 2000);
 
-    if (loading && feedData.length === 0) {
+    Toast.show({
+      type: ALERT_TYPE.SUCCESS,
+      title: 'Đã gửi cảm xúc!',
+      textBody: 'Cảm xúc của bạn đã được gửi tới chủ bài viết.',
+      autoClose: 1500,
+    });
+
+  };
+
+
+  if (loading && feedData.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <TopBar
@@ -588,16 +607,16 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
                   >
                     <Text style={styles.messageInputPlaceholder}>Gửi tin nhắn...</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => feeling('💛', parseInt(item.id, 10))} style={styles.emojiButton}>
+                  <TouchableOpacity onPress={() => handleFeeling('💛', parseInt(item.id, 10))} style={styles.emojiButton}>
                     <Text style={styles.emoji}>💛</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => feeling('🔥', parseInt(item.id, 10))} style={styles.emojiButton}>
+                  <TouchableOpacity onPress={() => handleFeeling('🔥', parseInt(item.id, 10))} style={styles.emojiButton}>
                     <Text style={styles.emoji}>🔥</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => feeling('😂', parseInt(item.id, 10))} style={styles.emojiButton}>
+                  <TouchableOpacity onPress={() => handleFeeling('😂', parseInt(item.id, 10))} style={styles.emojiButton}>
                     <Text style={styles.emoji}>😂</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => feeling('😍', parseInt(item.id, 10))} style={styles.emojiButton}>
+                  <TouchableOpacity onPress={() => handleFeeling('😍', parseInt(item.id, 10))} style={styles.emojiButton}>
                     <Text style={styles.emoji}>😍</Text>
                   </TouchableOpacity>
                 </View>
@@ -652,6 +671,11 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         onClose={() => setActivityModalVisible(false)}
         activities={activityList}
       />
+
+      {flyingEmoji.map((emoji, index) => (
+        <FlyingEmoji key={index} icon={emoji} />
+      ))}
+
     </SafeAreaView>
       {isTyping && (
         <KeyboardAvoidingView

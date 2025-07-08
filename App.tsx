@@ -59,17 +59,20 @@ import AppNavigation from './src/navigation/AppNavigation';
 import 'react-native-url-polyfill/auto';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
+import { AlertNotificationRoot } from 'react-native-alert-notification';
 
 
 const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <AlertNotificationRoot>
+        <SafeAreaView style={styles.container}>
+          <StatusBar barStyle="light-content" backgroundColor="#000" />
           <NavigationContainer>
             <AppNavigation />
           </NavigationContainer>
-      </SafeAreaView>
+        </SafeAreaView>
+      </AlertNotificationRoot>
     </Provider>
   );
 };
