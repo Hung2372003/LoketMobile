@@ -218,15 +218,15 @@ const handleEditName = () => {
         },
         {
           id: '13',
-          title: 'Chia sẻ Locket',
+          title: 'Chia sẻ Ketlok',
           icon: <Feather name="link" size={22} color={'#FFF'}/>,
-          onPress: () => console.log('Share Locket'),
+          onPress: () => console.log('Share Ketlok'),
         },
         {
           id: '14',
-          title: 'Đánh giá Locket',
+          title: 'Đánh giá Ketlok',
           icon: <Feather name="star" size={22} color={'#FFF'}/>,
-          onPress: () => console.log('Rate Locket'),
+          onPress: () => console.log('Rate Ketlok'),
         },
         {
           id: '15',

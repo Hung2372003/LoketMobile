@@ -43,7 +43,7 @@ const HomeRegister: React.FC<HomeRegisterProps> = ({ navigation }) => {
       <View style={styles.content}>
         <View style={styles.title}>
           <Image source={require('../../assets/logo_locket.png')} style={styles.logo}/>
-          <Text style={{color: '#fff', fontWeight: '900', fontSize: 30}}>Locket</Text>
+          <Text style={{color: '#fff', fontWeight: '900', fontSize: 30}}>Ketlok</Text>
         </View>
         <Text style={{color: '#b6b7b1', fontWeight: 'bold', fontSize: 20, marginBottom: 5}}>Ảnh trực tiếp từ bạn bè,</Text>
         <Text style={{color: '#b6b7b1', fontWeight: 'bold', fontSize: 20}}>ngay trên màn hình chính</Text>

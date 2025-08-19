@@ -29,7 +29,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({
           <Feather name="zap" size={24} color="#FFD700" style={styles.flashIcon} />
         )}
         {flashMode === 'off' && (
-          <Feather name="zap-off" size={24} color="#FFF" style={styles.flashIcon} />
+          <Feather name="youtube" size={24} color="#FFF" style={styles.flashIcon} />
         )}
         {flashMode === 'auto' && (
           <Feather name="zap" size={24} color="#AAA" style={styles.flashIcon} />

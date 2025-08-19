@@ -84,7 +84,7 @@ const flatListRef = useRef<FlatList>(null);
         id: parseInt(messIdString, 36) || Date.now(),
         content,
         createdTime: new Date(Date.now() - 7 * 60 * 60 * 1000).toString(),
-        createdBy: parseInt(_userCode, 36),
+        createdBy: parseInt(_userCode, 10),
         listFile: safeListFile,
       };
 
