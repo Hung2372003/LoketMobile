@@ -324,7 +324,7 @@ const FeedScreen = ({ navigation, route }: FeedScreenProps) => {
         // Lưu vào Camera Roll
         await CameraRoll.saveAsset(downloadPath, {
           type: 'photo',
-          album: 'Locket', // Tạo album riêng
+          album: 'Ketlok', // Tạo album riêng
         });
 
         // Xóa file tạm

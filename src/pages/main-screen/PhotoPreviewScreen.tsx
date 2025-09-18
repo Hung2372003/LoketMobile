@@ -105,7 +105,7 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
       await RNFS.copyFile(imageUri, downloadPath);
       await CameraRoll.saveAsset(downloadPath, {
         type: 'photo',
-        album: 'Locket',
+        album: 'Ketlok',
       });
 
       Alert.alert('Thành công', 'Ảnh đã được lưu vào thư viện');

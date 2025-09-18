@@ -81,10 +81,10 @@ const flatListRef = useRef<FlatList>(null);
       const safeListFile = Array.isArray(listFile) ? listFile : [];
       const messIdString = safeListFile[0]?.messId ?? Date.now().toString();
       const addMessage: MessageType = {
-        id: parseInt(messIdString, 36) || Date.now(),
+        id: parseInt(messIdString,10) || Date.now(),
         content,
         createdTime: new Date(Date.now() - 7 * 60 * 60 * 1000).toString(),
-        createdBy: parseInt(_userCode, 36),
+        createdBy: parseInt(_userCode, 10),
         listFile: safeListFile,
       };
 
