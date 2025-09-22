@@ -1,5 +1,5 @@
 import axiosInstance from '../api/axiosInstance';
-import stogare from '../api/storage'
+import stogare from '../api/storage';
 
 const getMyProfile = async () => {
     try {
@@ -9,7 +9,9 @@ const getMyProfile = async () => {
             throw new Error('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.');
         }
 
-        const response = await axiosInstance.post('/api/PersonalAction/GetPersonalInformation', Number(userId));
+        const response = await axiosInstance.get('/api/PersonalAction/GetPersonalInformation', {
+          params: {userCode: userId},
+        });
         if(response.data.error) {
             throw new Error('Lỗi khi lấy thông tin profile.');
         }

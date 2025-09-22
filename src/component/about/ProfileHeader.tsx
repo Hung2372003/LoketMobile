@@ -165,11 +165,11 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
   },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject, // Phủ lên toàn bộ component cha
+    ...StyleSheet.absoluteFillObject, 
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 60, // Giữ cho hình tròn giống avatar
+    borderRadius: 60,
   },
 });
 
