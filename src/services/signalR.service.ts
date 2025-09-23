@@ -9,7 +9,7 @@ export const connectToChatHub = async () => {
   if (!connection) {
     const token = await tokenService.getAccessToken();
     connection = new signalR.HubConnectionBuilder()
-      .withUrl('https://chatapi-49ao.onrender.com/hub', {
+      .withUrl('http://hungdepzaisieucapvutru.runasp.net/hub', {
         accessTokenFactory: () => token || '',
       })
       .withAutomaticReconnect()

@@ -5,7 +5,7 @@ export const chatManagementApi = {
     callApi<ApiResponse<Array<MessageReponse>>>('ActionMessage/GetAllMessageGroups', 'get'),
 
   getCountNewMessage: (): Promise<{count:number}> =>
-    callApi<{count:number}>('ChatBox/GetUnreadMessageCount','get'),
+    callApi<{count:number}>('ActionMessage/GetUnreadMessageCount','get'),
 
   createChatBox: (data: ReqestChatBox): Promise<ApiResponse<object>> =>{
     return callApi<ApiResponse<object>>('ChatBox/CreateWindowChat', 'post', data);
@@ -23,11 +23,11 @@ export const chatManagementApi = {
           } as any);
         });
       }
-    return  callApi<ApiResponse<Array<any>>>('ChatBox/UpdateMessage', 'post', formData);
+    return  callApi<ApiResponse<Array<any>>>('ChatBox/AddNewMessage', 'post', formData);
   },
 
   setStatusMess: (groupChatId:number): Promise<ApiResponse<object>> =>
-    callApi<ApiResponse<object>>('ChatBox/SetStatusMess', 'patch', {groupChatId:groupChatId}, true),
+    callApi<ApiResponse<object>>('ActionMessage/SetStatusReadMessage', 'patch', groupChatId),
 
   getListFriend: ():Promise<Array<ListFriend>> =>
     callApi<Array<ListFriend>>('ContactUser/ListFrends','get'),

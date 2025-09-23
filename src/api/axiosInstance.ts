@@ -2,7 +2,7 @@ import axios, { AxiosError, Method } from 'axios';
 import storage from './storage';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://chatapi-49ao.onrender.com',
+  baseURL: 'http://hungdepzaisieucapvutru.runasp.net',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,7 +24,7 @@ axiosInstance.interceptors.request.use(
 
 export default axiosInstance;
 
-const apiUrl = 'https://chatapi-49ao.onrender.com/api';
+const apiUrl = 'http://hungdepzaisieucapvutru.runasp.net/api';
 function handleError(error: AxiosError) {
   if (error.response) {
     console.log('API Error:', error.response.status, error.response.data);
