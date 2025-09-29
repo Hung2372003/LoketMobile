@@ -5,6 +5,7 @@ import {
   Alert,
   ActivityIndicator,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import {
   Camera,
@@ -21,6 +22,8 @@ import { RootState, AppDispatch } from '../../redux/store';
 import { fetchProfile } from '../../redux/profileSlice';
 import { chatManagementApi } from '../../api/endpoint.api';
 import { onReceiveMessage } from '../../services/signalR.service';
+import { launchImageLibrary } from 'react-native-image-picker';
+import Feather from '@react-native-vector-icons/feather';
 
 interface MainScreenProps {
   navigation: any;
@@ -92,6 +95,35 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     }
   };
 
+  // ADDED: Hàm xử lý chọn ảnh từ album
+  const handleSelectFromAlbum = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 1,
+    });
+
+    if (result.didCancel) {
+      console.log('User cancelled image picker');
+      return;
+    }
+
+    if (result.errorCode) {
+      console.log('ImagePicker Error: ', result.errorMessage);
+      Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
+      return;
+    }
+
+    if (result.assets && result.assets.length > 0) {
+      const selectedPhoto = result.assets[0];
+      if (selectedPhoto.uri) {
+        navigation.navigate('PhotoPreviewScreen', {
+          photoUri: selectedPhoto.uri,
+          photoPath: selectedPhoto.uri, // Đối với image-picker, uri cũng là path
+        });
+      }
+    }
+  };
+
   const handleProfilePress = () => {
     navigation.navigate('ProfileScreen');
   };
@@ -145,6 +177,11 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     );
   }
 
+  const getFlashIcon = () => {
+    if (cameraState.flashMode === 'on') return 'zap';
+    return 'youtube';
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.cameraWrapper}>
@@ -156,6 +193,15 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
           photo={true}
           enableZoomGesture
         />
+
+        <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
+          <Feather
+            name={getFlashIcon()}
+            size={24}
+            color={cameraState.flashMode === 'on' ? '#FFD700' : '#FFF'}
+          />
+        </TouchableOpacity>
+
       </View>
 
       <TopBar
@@ -170,9 +216,8 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
       <CameraControls
         onTakePhoto={handleTakePhoto}
-        onToggleFlash={toggleFlash}
         onToggleCamera={toggleCamera}
-        flashMode={cameraState.flashMode}
+        onSelectFromAlbum={handleSelectFromAlbum}
         isLoading={isPhotoLoading}
       />
 
@@ -195,6 +240,18 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     overflow: 'hidden',
     backgroundColor: '#000',
+  },
+  flashButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1, // Đảm bảo nút nằm trên camera
   },
   camera: {
     flex: 1,
