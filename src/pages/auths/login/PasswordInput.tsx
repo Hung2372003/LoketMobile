@@ -11,7 +11,8 @@ import authService from '../../../services/authService';
 import storage from '../../../api/storage';
 import { connectToChatHub, joinGroup } from '../../../services/signalR.service';
 import { chatManagementApi } from '../../../api/endpoint.api';
-
+import { FirebasePushService } from '../../../services/FirebasePushService';
+const pushService = new FirebasePushService();
 type PasswordInputRouteProps = RouteProp<RootStackParamList, 'PasswordInput'>;
 
 interface PasswordInputProps {
@@ -57,6 +58,11 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
       });
       listFriend.forEach(async (x) => {
         await joinGroup('user_' + x.userCode.toString());
+      });
+              await pushService.getToken().then(async (tokenDevice) => {
+          if(tokenDevice) {
+            await pushService.sendTokenToServer(tokenDevice);
+          }
       });
 //      Alert.alert(title);
       navigation.navigate('MainScreen');

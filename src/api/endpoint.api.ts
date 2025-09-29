@@ -46,18 +46,28 @@ export const PostManagementApi = {
    getFeelPost : (data:{postCode : number}) : Promise<ApiResponse<Array<GetFeelPostReponse>>> =>
     callApi<ApiResponse<Array<GetFeelPostReponse>>>('PostManagement/GetFeelPost','get',data),
 };
-export const DeviceTokenFirebaseApi = {
-   setToken: (token:string): Promise<any> =>
-    callApi<any>('DeviceTokens', 'post',{token:token}),
-   getTokenById : (userId:string) : Promise<{token:string}> =>
-    callApi<{token:string}>('DeviceTokens/getTokenById','post',{userId:userId}),
+export const FirebaseManagermentApi = {
+   saveTokenDevices: (data:DeviceTokenRequest): Promise<any> =>
+    callApi<any>('FirebaseManagerment/SaveTokenDevices', 'post',data),
+   getTokenById : (data:DeviceTokenRequest) : Promise<{token:string}> =>
+    callApi<{token:string}>('FirebaseManagerment/getTokenById','post',data),
    getAllToken : () : Promise<any> =>
-    callApi<any>('DeviceTokens','get'),
-   senNotif: (token:string): Promise<any> =>
-    callApi<any>('/send','post',token),
+    callApi<any>('FirebaseManagerment/GetAllTokenDevices','get'),
+   senNotifMessage: (data:SenNotifRequest): Promise<any> =>
+    callApi<any>('FirebaseManagerment/SenNotifMessage','post',data),
 };
 
+export interface SenNotifRequest{
+  title?:string,
+  fcmToken:string,
+  notification?:string,
+}
 
+export interface DeviceTokenRequest{
+  token?:string,
+  userId?:string
+
+}
 
 export interface FeelPostRequest{
    postCode: number,

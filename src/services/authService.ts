@@ -1,6 +1,7 @@
 import axiosInstance from '../api/axiosInstance';
 import axios from 'axios';
 
+
 const login = async (username: string, password: string) => {
   try {
     const response = await axiosInstance.post(
@@ -53,7 +54,7 @@ const register = async (userAccount: string, password: string, name: string) => 
     if (!token) {
       throw new Error('Không nhận được token xác thực.');
     }
-
+    
     return { token, userId, title};
   } catch (error) {
     if (axios.isAxiosError(error)) {

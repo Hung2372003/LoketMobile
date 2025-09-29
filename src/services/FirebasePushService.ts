@@ -1,6 +1,6 @@
 import messaging, { FirebaseMessagingTypes } from "@react-native-firebase/messaging";
 import axios from "axios";
-import { DeviceTokenFirebaseApi } from "../api/endpoint.api";
+import { FirebaseManagermentApi } from "../api/endpoint.api";
 
 
 export interface IFirebasePushService {
@@ -61,7 +61,7 @@ export class FirebasePushService implements IFirebasePushService {
   /** Gửi token lên server (không cần userId) */
   async sendTokenToServer(token: string): Promise<void> {
     try {
-      const res = await DeviceTokenFirebaseApi.setToken(token);
+      const res = await FirebaseManagermentApi.saveTokenDevices({token:token});
 
       console.log("Token đã gửi lên server:", res.data);
     } catch (error: any) {
