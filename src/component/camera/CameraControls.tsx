@@ -9,31 +9,21 @@ import Feather from '@react-native-vector-icons/feather';
 
 interface CameraControlsProps {
   onTakePhoto: () => void;
-  onToggleFlash: () => void;
   onToggleCamera: () => void;
-  flashMode: 'on' | 'off' | 'auto';
+  onSelectFromAlbum: () => void;
   isLoading: boolean;
 }
 
 const CameraControls: React.FC<CameraControlsProps> = ({
                                                          onTakePhoto,
-                                                         onToggleFlash,
                                                          onToggleCamera,
-                                                         flashMode,
+                                                         onSelectFromAlbum,
                                                          isLoading,
                                                        }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.flashButton} onPress={onToggleFlash}>
-        {flashMode === 'on' && (
-          <Feather name="zap" size={24} color="#FFD700" style={styles.flashIcon} />
-        )}
-        {flashMode === 'off' && (
-          <Feather name="youtube" size={24} color="#FFF" style={styles.flashIcon} />
-        )}
-        {flashMode === 'auto' && (
-          <Feather name="zap" size={24} color="#AAA" style={styles.flashIcon} />
-        )}
+      <TouchableOpacity onPress={onSelectFromAlbum} style={styles.sideButton}>
+        <Feather name="image" size={28} color="#FFF" />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -114,6 +104,12 @@ const styles = StyleSheet.create({
   },
   flipIcon: {
     fontSize: 20,
+  },
+  sideButton: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
