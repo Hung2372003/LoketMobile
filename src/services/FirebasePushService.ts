@@ -61,7 +61,7 @@ export class FirebasePushService implements IFirebasePushService {
   /** Gửi token lên server (không cần userId) */
   async sendTokenToServer(token: string): Promise<void> {
     try {
-      const res = await FirebaseManagermentApi.setToken(token);
+      const res = await FirebaseManagermentApi.saveTokenDevices({token:token});
 
       console.log("Token đã gửi lên server:", res.data);
     } catch (error: any) {
