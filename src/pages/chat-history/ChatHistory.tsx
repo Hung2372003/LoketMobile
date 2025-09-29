@@ -19,7 +19,7 @@ interface ListUser {
 
 export const ChatHistory: React.FC = () => {
   const navigation = useNavigation<ChatHistoryNavigationProp>();
-  const [message, setMessage] = useState<Array<MessageReponse>>([]); // bạn nên định nghĩa rõ type cho message nếu có
+  const [message, setMessage] = useState<Array<MessageReponse>>([]);
   const [friendNoMess, setFriendNoMess] = useState<Array<ListFriend>>([]);
   useEffect(() => {
     const fetchChatHistory = async () => {

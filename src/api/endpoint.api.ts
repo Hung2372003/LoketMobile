@@ -35,6 +35,9 @@ export const chatManagementApi = {
   getAllGroupChatId: ():Promise<ApiResponse<Array<{groupChatId:number}>>> =>
     callApi<ApiResponse<Array<{groupChatId:number}>>>('ChatBox/GetAllGroupChatId','get'),
 
+  getUserIdByGroupChatId: (groupChatId:number):Promise<ApiResponse<{userId:number}>> =>
+    callApi<ApiResponse<{userId:number}>>('PersonalAction/GetUserIdByGroup','get',groupChatId),
+
 };
 
 export const PostManagementApi = {
@@ -43,6 +46,18 @@ export const PostManagementApi = {
    getFeelPost : (data:{postCode : number}) : Promise<ApiResponse<Array<GetFeelPostReponse>>> =>
     callApi<ApiResponse<Array<GetFeelPostReponse>>>('PostManagement/GetFeelPost','get',data),
 };
+export const DeviceTokenFirebaseApi = {
+   setToken: (token:string): Promise<any> =>
+    callApi<any>('DeviceTokens', 'post',{token:token}),
+   getTokenById : (userId:string) : Promise<{token:string}> =>
+    callApi<{token:string}>('DeviceTokens/getTokenById','post',{userId:userId}),
+   getAllToken : () : Promise<any> =>
+    callApi<any>('DeviceTokens','get'),
+   senNotif: (token:string): Promise<any> =>
+    callApi<any>('/send','post',token),
+};
+
+
 
 export interface FeelPostRequest{
    postCode: number,

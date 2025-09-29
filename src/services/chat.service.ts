@@ -1,10 +1,16 @@
-import { ApiResponse, chatManagementApi, UpdateMessageRequestData, UpdateMessReponse } from '../api/endpoint.api';
+import { ApiResponse, chatManagementApi, DeviceTokenFirebaseApi, UpdateMessageRequestData, UpdateMessReponse } from '../api/endpoint.api';
 import { sendMessageToGroup } from './signalR.service';
 import RNFS from 'react-native-fs';
 import { Platform } from 'react-native';
+import { FirebasePushService } from './FirebasePushService';
+const pushService = new FirebasePushService();
+
 const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) => {
      try {
         const data : ApiResponse<Array<UpdateMessReponse>> = await chatManagementApi.updateMessage(updateMessageRequestData);
+        const userReceive = await chatManagementApi.getUserIdByGroupChatId(updateMessageRequestData.groupChatId!);
+        const tokenDeviceReceive = await DeviceTokenFirebaseApi.getTokenById(userReceive.object!.userId.toString());
+        await pushService.sendTokenToServer(tokenDeviceReceive.token);
         await sendMessageToGroup('groupChat_' + updateMessageRequestData.groupChatId.toString(),updateMessageRequestData.content,data.object);
         if(data.error) {
             throw new Error('Lỗi khi lấy thông tin profile.');

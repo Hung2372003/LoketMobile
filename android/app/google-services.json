@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "234375499942",
+    "project_id": "ketlook-5edec",
+    "storage_bucket": "ketlook-5edec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234375499942:android:a92dfb014e273812da2467",
+        "android_client_info": {
+          "package_name": "com.chatappnative"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvKxbWcdyJULQnWb1B31bDjlU-EwCDiYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -11,27 +11,27 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
-
-import com.chatappnative.CameraModule;
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
-      object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
-                add(CameraPackage())
-            }
+    object : DefaultReactNativeHost(this) {
+      override fun getPackages(): List<ReactPackage> =
+        PackageList(this).packages.apply {
+          // Nếu có package custom thì thêm ở đây
+          add(CameraPackage())
+        }
 
-        override fun getJSMainModuleName(): String = "index"
+      override fun getJSMainModuleName(): String = "index"
 
-        override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
+      override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
-        override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
-        override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-      }
+      override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+      override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
+    }
 
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
@@ -40,8 +40,18 @@ class MainApplication : Application(), ReactApplication {
     super.onCreate()
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-      // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
+    }
+
+    // 🔔 Tạo Notification Channel cho Android 8+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channel = NotificationChannel(
+        "default_channel",                // ID channel (phải trùng meta-data trong AndroidManifest)
+        "Default Notifications",          // Tên hiển thị trong setting
+        NotificationManager.IMPORTANCE_DEFAULT
+      )
+      val manager = getSystemService(NotificationManager::class.java)
+      manager.createNotificationChannel(channel)
     }
   }
 }
