@@ -36,7 +36,7 @@ export const chatManagementApi = {
     callApi<ApiResponse<Array<{groupChatId:number}>>>('ChatBox/GetAllGroupChatId','get'),
 
   getUserIdByGroupChatId: (groupChatId:number):Promise<ApiResponse<{userId:number}>> =>
-    callApi<ApiResponse<{userId:number}>>('PersonalAction/GetUserIdByGroup','get',groupChatId),
+    callApi<ApiResponse<{userId:number}>>('PersonalAction/GetUserIdByGroup','post',{groupChatId:groupChatId}),
 
 };
 

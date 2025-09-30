@@ -1,7 +1,16 @@
-import messaging, { FirebaseMessagingTypes } from "@react-native-firebase/messaging";
-import axios from "axios";
+import {
+  getMessaging,
+  getToken as getFcmToken,
+  onMessage,
+  onNotificationOpenedApp,
+  getInitialNotification as getInitialMsg,
+  onTokenRefresh,
+  requestPermission,
+  AuthorizationStatus,
+  FirebaseMessagingTypes,
+} from "@react-native-firebase/messaging";
+import { getApp } from "@react-native-firebase/app";
 import { FirebaseManagermentApi } from "../api/endpoint.api";
-
 
 export interface IFirebasePushService {
   requestPermission(): Promise<boolean>;
@@ -14,19 +23,21 @@ export interface IFirebasePushService {
 }
 
 export class FirebasePushService implements IFirebasePushService {
+  private messaging = getMessaging(getApp());
+
   /** Yêu cầu quyền thông báo */
   async requestPermission(): Promise<boolean> {
-    const authStatus = await messaging().requestPermission();
+    const authStatus = await requestPermission(this.messaging);
     return (
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
+      authStatus === AuthorizationStatus.AUTHORIZED ||
+      authStatus === AuthorizationStatus.PROVISIONAL
     );
   }
 
   /** Lấy token FCM */
   async getToken(): Promise<string | null> {
     try {
-      return await messaging().getToken();
+      return await getFcmToken(this.messaging);
     } catch (error) {
       console.error("Lỗi khi lấy FCM token:", error);
       return null;
@@ -35,19 +46,19 @@ export class FirebasePushService implements IFirebasePushService {
 
   /** Lắng nghe khi có thông báo (app foreground) */
   onMessage(callback: (message: FirebaseMessagingTypes.RemoteMessage) => void): void {
-    messaging().onMessage(callback);
+    onMessage(this.messaging, callback);
   }
 
   /** Lắng nghe khi user click vào notif lúc app ở background */
   onNotificationOpened(callback: (message: FirebaseMessagingTypes.RemoteMessage) => void): void {
-    messaging().onNotificationOpenedApp(callback);
+    onNotificationOpenedApp(this.messaging, callback);
   }
 
   /** Lấy notif khi app bị kill hẳn, mở từ notif */
   async getInitialNotification(
     callback: (message: FirebaseMessagingTypes.RemoteMessage) => void
   ): Promise<void> {
-    const msg = await messaging().getInitialNotification();
+    const msg = await getInitialMsg(this.messaging);
     if (msg) {
       callback(msg);
     }
@@ -55,14 +66,13 @@ export class FirebasePushService implements IFirebasePushService {
 
   /** Lắng nghe khi token thay đổi */
   onTokenRefresh(callback: (token: string) => void): void {
-    messaging().onTokenRefresh(callback);
+    onTokenRefresh(this.messaging, callback);
   }
 
-  /** Gửi token lên server (không cần userId) */
+  /** Gửi token lên server */
   async sendTokenToServer(token: string): Promise<void> {
     try {
-      const res = await FirebaseManagermentApi.saveTokenDevices({token:token});
-
+      const res = await FirebaseManagermentApi.saveTokenDevices({ token: token });
       console.log("Token đã gửi lên server:", res.data);
     } catch (error: any) {
       console.error(
