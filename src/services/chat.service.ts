@@ -9,16 +9,20 @@ const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) 
      try {
         const data : ApiResponse<Array<UpdateMessReponse>> = await chatManagementApi.updateMessage(updateMessageRequestData);
         const userReceive = await chatManagementApi.getUserIdByGroupChatId(updateMessageRequestData.groupChatId!);
-        const tokenDeviceReceive = await FirebaseManagermentApi.getTokenById({userId:userReceive.object!.userId.toString()});
-        await pushService.sendTokenToServer(tokenDeviceReceive.token);
         await sendMessageToGroup('groupChat_' + updateMessageRequestData.groupChatId.toString(),updateMessageRequestData.content,data.object);
         if(data.error) {
             throw new Error('Lỗi khi lấy thông tin profile.');
         }
-        await FirebaseManagermentApi.senNotifMessage({
-            fcmToken: tokenDeviceReceive.token,
-            title: 'Tin nhắn mới',
-            notification: updateMessageRequestData.content});
+
+        if(userReceive.object != null && userReceive.object.length > 0) {
+           userReceive.object.forEach(async (x) => {
+              await FirebaseManagermentApi.senNotifMessage({
+                title: 'Tin nhắn mới',
+                notification: updateMessageRequestData.content,
+                userId: x.id?.toString()});
+           });
+        }
+      
         return data.object;
     } catch (error) {
         throw error;

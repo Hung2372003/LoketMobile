@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { EventEmitter } from "events";
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_ID_KEY = 'userId';
-
+export const storageEvents = new EventEmitter();
 const storeTokens = async (accessToken: string ) => {
   try {
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    storageEvents.emit("TOKEN_CHANGED", accessToken);
   } catch (e) {
     console.error('Failed to store tokens', e);
   }
@@ -50,6 +51,7 @@ const getUserId = async () => {
 const clearTokens = async () => {
   try {
     await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    storageEvents.emit("TOKEN_CHANGED", null);
   } catch (e) {
     console.error('Failed to clear tokens', e);
   }

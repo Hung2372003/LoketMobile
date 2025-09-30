@@ -64,7 +64,6 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
         const token = await pushService.getToken();
         console.log("FCM Token:", token);
         if (token) {
-          
           await pushService.sendTokenToServer(token);
         }
       }

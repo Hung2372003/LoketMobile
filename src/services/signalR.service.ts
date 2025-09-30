@@ -2,7 +2,7 @@ import * as signalR from '@microsoft/signalr';
 import tokenService from '../api/storage';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
-let connection: signalR.HubConnection;
+let connection: signalR.HubConnection | null = null;
 
 
 export const connectToChatHub = async () => {
@@ -29,11 +29,19 @@ export const connectToChatHub = async () => {
   }
 };
 export const joinGroup = async (groupChatId: string) => {
-  await connection.invoke('JoinGroup', groupChatId);
+  if (connection) {
+    await connection.invoke('JoinGroup', groupChatId);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const leaveGroup = async (groupChatId: string) => {
-  await connection.invoke('LeaveGroup', groupChatId);
+  if (connection) {
+    await connection.invoke('LeaveGroup', groupChatId);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const sendMessageToGroup = async (
@@ -41,46 +49,90 @@ export const sendMessageToGroup = async (
   contents?: string,
   listFile?: any
 ) => {
-  await connection.invoke('SendMessageToGroup', groupChatId, contents, listFile);
+  if (connection) {
+    await connection.invoke('SendMessageToGroup', groupChatId, contents, listFile);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const SendNotificationToGroup = async (
   groupId: string,
   notification: string,
 ) => {
-  await connection.invoke('SendNotificationToGroup', groupId,notification);
+  if (connection) {
+    await connection.invoke('SendNotificationToGroup', groupId, notification);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const onReceiveNotification = (
   callback: (notification:string) => void
 ) => {
-  connection.on('ReceiveNotification', callback);
+  if (connection) {
+    connection.on('ReceiveNotification', callback);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const onListUserOnline = (callback: (userCodes: string[]) => void) => {
-  connection.on('ListUserOnline', callback);
+  if (connection) {
+    connection.on('ListUserOnline', callback);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 
 export const onReceiveMessage = (
   callback: (groupChatId: string, content: string, userCode: string, listFile?: any) => void
 ) => {
-  connection.on('ReceiveMessage', callback);
+  if (connection) {
+    connection.on('ReceiveMessage', callback);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 
 export const offReceiveMessage = (callback: (...args: any[]) => void) => {
-  connection.off('ReceiveMessage', callback);
+  if (connection) {
+    connection.off('ReceiveMessage', callback);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const onReceiveLikeStatus = (
   callback: (postId: number, like: boolean) => void
 ) => {
-  connection.on('ReceiveLikeStatus', callback);
+  if (connection) {
+    connection.on('ReceiveLikeStatus', callback);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
 };
 
 export const sendLikeStatus = async (postId: number, like: boolean) => {
-  await connection.invoke('SendLikeStatus', postId, like);
+  if (connection) {
+    await connection.invoke('SendLikeStatus', postId, like);
+  } else {
+    console.error('SignalR connection is not established.');
+  }
+};
+export const disconnectChatHub = async () => {
+  if (connection) {
+    try {
+      await connection.stop();
+      console.log("🔌 SignalR disconnected");
+    } catch (err) {
+      console.error("❌ Failed to disconnect:", err);
+    } finally {
+      connection = null;
+    }
+  }
 };
 
 

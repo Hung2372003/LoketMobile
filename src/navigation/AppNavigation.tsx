@@ -44,11 +44,13 @@ export type RootStackParamList = {
 };
 
 // const Stack = createNativeStackNavigator<RootStackParamList>();
-
+interface AppNavigationProps {
+  initialRouteName?: keyof RootStackParamList;
+}
 const Stack = createStackNavigator<RootStackParamList>();
-const AppNavigation: React.FC = () => {
+const AppNavigation: React.FC<AppNavigationProps> = ({ initialRouteName }) => {
   return (
-    <Stack.Navigator initialRouteName="HomeRegister" screenOptions={{
+    <Stack.Navigator initialRouteName={initialRouteName ?? "HomeRegister"} screenOptions={{
       headerShown: false,
       gestureEnabled: true,
       gestureDirection: 'horizontal',

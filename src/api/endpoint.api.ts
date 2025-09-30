@@ -35,8 +35,8 @@ export const chatManagementApi = {
   getAllGroupChatId: ():Promise<ApiResponse<Array<{groupChatId:number}>>> =>
     callApi<ApiResponse<Array<{groupChatId:number}>>>('ChatBox/GetAllGroupChatId','get'),
 
-  getUserIdByGroupChatId: (groupChatId:number):Promise<ApiResponse<{userId:number}>> =>
-    callApi<ApiResponse<{userId:number}>>('PersonalAction/GetUserIdByGroup','post',{groupChatId:groupChatId}),
+  getUserIdByGroupChatId: (groupChatId:number):Promise<ApiResponse<Array<{id?:number,name?:string,avatar?:string}>>> =>
+    callApi<ApiResponse<Array<{id?:number,name?:string,avatar?:string}>>>('ChatBox/GetAllUserByGroupChatId','post',{groupChatId:groupChatId}),
 
 };
 
@@ -59,8 +59,8 @@ export const FirebaseManagermentApi = {
 
 export interface SenNotifRequest{
   title?:string,
-  fcmToken:string,
   notification?:string,
+  userId?:string,
 }
 
 export interface DeviceTokenRequest{
