@@ -79,6 +79,22 @@ const removeFriend = async (friendCode: number) => {
   }
 };
 
+const rejectFriend = async (friendCode: number) => {
+  try {
+    const response = await axiosInstance.delete('/api/PersonalAction/Unfriend', {
+      params: { FriendCode: friendCode }});
+
+    // Xử lý response chuẩn từ backend của bạn
+    if (response.data.error) {
+      throw new Error('Từ chối thất bại.');
+    }
+    return response.data;
+  } catch (error) {
+    // Ném lỗi để component có thể bắt và xử lý
+    throw error;
+  }
+};
+
 const getListFriends = async () => {
   try {
     const response = await axiosInstance.get('/api/ContactUser/ListFriends');
@@ -96,6 +112,7 @@ const friendService = {
   acceptFriendRequest,
   removeFriend,
   getListFriends,
+  rejectFriend,
 };
 
 export default friendService;

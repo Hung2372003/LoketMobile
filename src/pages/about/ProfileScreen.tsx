@@ -108,6 +108,7 @@ const handleEditName = () => {
   const handleLogout = async () => {
     try {
       await userService.logout();
+      await userService.logoutApp();
       console.log('User has been logged out.');
       await storage.clearTokens();
       await storage.clearUserId();

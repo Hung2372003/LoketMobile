@@ -19,6 +19,9 @@ import { Friend, AppLinkData, FriendRequest, SearchResult } from '../../types/fr
 import { colors, typography, spacing } from './friend.style';
 import { useFocusEffect} from '@react-navigation/native';
 import friendService from '../../services/friendService';
+import { useSelector} from 'react-redux';
+import { RootState} from '../../redux/store';
+import { FirebaseManagermentApi } from '../../api/endpoint.api';
 
 interface FriendsScreenProps {
   navigation: any; // Replace with proper navigation type
@@ -51,7 +54,9 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const searchTimer = useRef<NodeJS.Timeout | null>(null)
+  const searchTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const currentUserName = useSelector((state: RootState) => state.profile.data?.name);
 
   useFocusEffect(
     useCallback(() => {
@@ -193,10 +198,25 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
 
   // --- ACTION HANDLERS ---
   const handleSendRequest = async (userId: string) => {
+    if (!currentUserName) {
+      Alert.alert('Lỗi', 'Không lấy được thông tin người dùng. Vui lòng thử lại.');
+      return;
+    }
+
     try {
+      // 1. Gửi request lên server
       await friendService.sendFriendRequest(Number(userId));
+
+      // 2. Gửi thông báo qua Firebase
+      await FirebaseManagermentApi.senNotifMessage({
+          title: 'Lời mời kết bạn mới',
+          notification: `${currentUserName} đã gửi cho bạn một lời mời kết bạn.`,
+          userId: userId.toString()
+      });
+
       Alert.alert('Thành công', 'Đã gửi lời mời kết bạn.');
-      // Cập nhật UI để hiển thị trạng thái "Đã gửi"
+
+      // 3. Cập nhật UI
       setSearchResults(prev => prev.map(user => user.id === userId ? { ...user, status: 'pending' } : user));
     } catch (err: any) {
       Alert.alert('Lỗi', err.message);
@@ -212,6 +232,18 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
       Alert.alert('Thành công', `Bạn và ${request.name} đã trở thành bạn bè.`);
     } catch (err: any) {
       Alert.alert('Lỗi', err.message);
+    }
+  };
+
+  const handleRejectRequest = async (friendId: string) => {
+    try {
+
+      await friendService.rejectFriend(Number(friendId));
+
+      setFriendRequests(prev => prev.filter(r => r.id !== friendId));
+
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message || 'Không thể từ chối vào lúc này.');
     }
   };
 
@@ -308,7 +340,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({navigation}) => {
                 <TouchableOpacity style={[styles.actionButton, styles.acceptButton]} onPress={() => handleAcceptRequest(req)}>
                   <Text style={styles.actionButtonText}>Chấp nhận</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionButton, styles.declineButton]} onPress={() => handleAcceptRequest(req)} >
+                <TouchableOpacity style={[styles.actionButton, styles.declineButton]} onPress={() => handleRejectRequest(req.id)} >
                   <Text style={styles.actionButtonText}>Từ chối</Text>
                 </TouchableOpacity>
               </FriendItem>
