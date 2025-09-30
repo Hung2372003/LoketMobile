@@ -16,6 +16,7 @@ import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import RNFS from 'react-native-fs';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import Feather from '@react-native-vector-icons/feather';
+import PhotoEditor from '@baronha/react-native-photo-editor';
 
 interface PhotoPreviewScreenProps {
   navigation: any;
@@ -32,8 +33,12 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
 
-  // Fix image URI - ensure it has proper file:// prefix
-  const imageUri = photoUri.startsWith('file://') ? photoUri : `file://${photoUri}`;
+  const [currentPhotoUri, setCurrentPhotoUri] = useState(photoUri);
+  const [currentPhotoPath, setCurrentPhotoPath] = useState(photoPath);
+
+  const imageUri = currentPhotoUri.startsWith('file://') ? currentPhotoUri : `file://${currentPhotoUri}`;
+
+
 
   console.log('Photo URI:', photoUri);
   console.log('Photo Path:', photoPath);
@@ -48,8 +53,8 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
         content: content.trim() || undefined,
         status: 'PUBLIC',
         file: {
-          path: photoPath,
-          uri: photoUri,
+          path: currentPhotoPath,
+          uri: currentPhotoUri,
         },
       };
 
@@ -71,6 +76,34 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
       Alert.alert('Lỗi', 'Không thể đăng ảnh. Vui lòng thử lại.');
     } finally {
       setIsPosting(false);
+    }
+  };
+
+  const handleEditPhoto = async () => {
+    try {
+      const pathForEditor = currentPhotoPath.replace('file://', '');
+
+      // MODIFIED: Sửa lỗi 1 - Thêm thuộc tính 'stickers' là một mảng rỗng
+      const resultPath = await PhotoEditor.open({
+        path: pathForEditor,
+        stickers: [],
+      });
+
+      console.log('Edited photo path:', resultPath);
+
+      const newUri = resultPath.startsWith('file://') ? resultPath : `file://${resultPath}`;
+
+      // MODIFIED: Sửa lỗi 2 - Ép kiểu về 'string' nguyên thủy
+      setCurrentPhotoUri(String(newUri));
+      setCurrentPhotoPath(String(newUri));
+
+    } catch (error: any) {
+      if (error.code !== 'E_USER_CANCELLED') {
+        console.log('Photo editor error:', error);
+        //Alert.alert('Cancel', 'Xác nhận hủy chỉnh sửa ảnh.');
+      } else {
+        console.log('User cancelled photo editor');
+      }
     }
   };
 
@@ -98,7 +131,7 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
 
     try {
       const timestamp = new Date().getTime();
-      const ext = photoUri.split('.').pop() || 'jpg';
+      const ext = imageUri.split('.').pop() || 'jpg';
       const fileName = `locket_preview_${timestamp}.${ext}`;
       const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
@@ -119,9 +152,13 @@ const PhotoPreviewScreen: React.FC<PhotoPreviewScreenProps> = ({ navigation, rou
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
+      <View style={styles.headerSpacer} />
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerSpacer} />
+        
+        <TouchableOpacity onPress={handleEditPhoto} style={styles.editButton}>
+          <Feather name="edit-2" size={24} style={styles.editText}/>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Gửi đến...</Text>
         <TouchableOpacity onPress={handleDownload} style={styles.downloadButton}>
           {/*<Text style={styles.downloadText}>↓</Text>*/}
@@ -340,6 +377,19 @@ const styles = StyleSheet.create({
   selectedFriendName: {
     color: '#FFA500',
     fontWeight: 'bold',
+  },
+  editButton: {
+    width: 45,
+    height: 45,
+    borderRadius: 20,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: [{translateY: 40}],
+    zIndex: 1,
+  },
+  editText: {
+    color: '#FFF',
   },
 });
 
