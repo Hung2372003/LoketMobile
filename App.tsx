@@ -43,6 +43,7 @@ const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | unde
             body,
             android: {
               channelId,
+              largeIcon: msg.notification?.image, 
               sound: "default",
               importance: AndroidImportance.HIGH,
               pressAction: { id: "default" },
@@ -107,7 +108,7 @@ useEffect(() => {
   init();
 
   return () => {
-    storageEvents.removeAllListeners("TOKEN_CHANGED");
+    storageEvents.off("TOKEN_CHANGED");
   };
 }, []);
   return (

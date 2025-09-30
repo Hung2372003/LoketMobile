@@ -1,9 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { EventEmitter } from "events";
+import mitt from 'mitt';
+
+type Events = {
+  TOKEN_CHANGED: string | null;
+};
+
+export const storageEvents = mitt<Events>();
+
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_ID_KEY = 'userId';
-export const storageEvents = new EventEmitter();
-const storeTokens = async (accessToken: string ) => {
+
+const storeTokens = async (accessToken: string) => {
   try {
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     storageEvents.emit("TOKEN_CHANGED", accessToken);
@@ -12,11 +19,12 @@ const storeTokens = async (accessToken: string ) => {
   }
 };
 
-const storeUserId = async (userId: number) => {
+const clearTokens = async () => {
   try {
-    await AsyncStorage.setItem(USER_ID_KEY, String(userId));
+    await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    storageEvents.emit("TOKEN_CHANGED", null);
   } catch (e) {
-    console.error('Failed to store user ID', e);
+    console.error('Failed to clear tokens', e);
   }
 };
 
@@ -29,6 +37,13 @@ const getAccessToken = async () => {
   }
 };
 
+const storeUserId = async (userId: number) => {
+  try {
+    await AsyncStorage.setItem(USER_ID_KEY, String(userId));
+  } catch (e) {
+    console.error('Failed to store user ID', e);
+  }
+};
 
 const getUserId = async () => {
   try {
@@ -36,24 +51,6 @@ const getUserId = async () => {
   } catch (e) {
     console.error('Failed to get user ID', e);
     return null;
-  }
-};
-
-// const getRefreshToken = async () => {
-//   try {
-//     return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-//   } catch (e) {
-//     console.error('Failed to get refresh token', e);
-//     return null;
-//   }
-// };
-
-const clearTokens = async () => {
-  try {
-    await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
-    storageEvents.emit("TOKEN_CHANGED", null);
-  } catch (e) {
-    console.error('Failed to clear tokens', e);
   }
 };
 
@@ -65,14 +62,11 @@ const clearUserId = async () => {
   }
 };
 
-const tokenService = {
+export default {
   storeTokens,
   getAccessToken,
   clearTokens,
   storeUserId,
   getUserId,
   clearUserId,
-
 };
-
-export default tokenService;
