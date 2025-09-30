@@ -59,11 +59,15 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
       listFriend.forEach(async (x) => {
         await joinGroup('user_' + x.userCode.toString());
       });
-              await pushService.getToken().then(async (tokenDevice) => {
-          if(tokenDevice) {
-            await pushService.sendTokenToServer(tokenDevice);
-          }
-      });
+      const granted = await pushService.requestPermission();
+      if (granted) {
+        const token = await pushService.getToken();
+        console.log("FCM Token:", token);
+        if (token) {
+          
+          await pushService.sendTokenToServer(token);
+        }
+      }
 //      Alert.alert(title);
       navigation.navigate('MainScreen');
     } catch (error) {

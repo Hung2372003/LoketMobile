@@ -67,15 +67,7 @@ const pushService = new FirebasePushService();
 const App: React.FC = () => {
   useEffect(() => {
     (async () => {
-      const granted = await pushService.requestPermission();
-      if (granted) {
-        const token = await pushService.getToken();
-        console.log("FCM Token:", token);
-        if (token) {
-          
-          await pushService.sendTokenToServer(token);
-        }
-      }
+     
 
       // Foreground
       pushService.onMessage((msg) => {
