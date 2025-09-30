@@ -1,5 +1,6 @@
 import axiosInstance from '../api/axiosInstance';
 import stogare from '../api/storage';
+import { FirebasePushService } from './FirebasePushService';
 
 const getMyProfile = async () => {
     try {
@@ -29,6 +30,26 @@ const logout = async () => {
           throw new Error('Lỗi khi lấy thông tin profile.');
       }
       return response.data.object;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const logoutApp = async () => {
+    try {
+      const userId = await stogare.getUserId();
+      const pushService = new FirebasePushService();
+      const token = await pushService.getToken();
+      console.log("FCM Token:", token);
+
+      const response = await axiosInstance.post('/api/Security/LogoutApp',
+      {
+        token: token,
+        userId: userId,
+      });
+      if(response.data.error) {
+          throw new Error('Lỗi');
+      }
     } catch (error) {
         throw error;
     }
@@ -108,6 +129,7 @@ const userService = {
     updateMyProfile,
     updateAvatar,
     logout,
+    logoutApp,
     updateProfileName,
 };
 
