@@ -28,7 +28,8 @@ const HistorySection: React.FC<HistorySectionProps> = () => {
       <TouchableOpacity style={styles.historyButton} onPress={handleHistoryPress}>
         <Text style={styles.historyText}>Lịch sử</Text>
         {/*<Text style={styles.historyIcon}>⌄</Text>*/}
-        icon: <Feather name="chevron-down" size={22} color={'#FFF'}/>,
+        {/* icon:  */}
+        <Feather name="chevron-down" size={22} color={'#FFF'}/>
       </TouchableOpacity>
     </View>
   );

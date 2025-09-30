@@ -49,16 +49,16 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ navigation }) => {
 
       await storage.storeTokens(token);
       await storage.storeUserId(userId);
-      await connectToChatHub();
-      await joinGroup('user_' + userId.toString());
-      let listFriend = await chatManagementApi.getListFriend();
-      let listGroupChatId = await chatManagementApi.getAllGroupChatId();
-      listGroupChatId.object?.forEach(async (x)=>{
-        await joinGroup('groupChat_' + x.groupChatId.toString());
-      });
-      listFriend.forEach(async (x) => {
-        await joinGroup('user_' + x.userCode.toString());
-      });
+      // await connectToChatHub();
+      // await joinGroup('user_' + userId.toString());
+      // let listFriend = await chatManagementApi.getListFriend();
+      // let listGroupChatId = await chatManagementApi.getAllGroupChatId();
+      // listGroupChatId.object?.forEach(async (x)=>{
+      //   await joinGroup('groupChat_' + x.groupChatId.toString());
+      // });
+      // listFriend.forEach(async (x) => {
+      //   await joinGroup('user_' + x.userCode.toString());
+      // });
       const granted = await pushService.requestPermission();
       if (granted) {
         const token = await pushService.getToken();

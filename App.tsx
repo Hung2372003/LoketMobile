@@ -14,6 +14,7 @@ import { FirebasePushService } from './src/services/FirebasePushService';
 import storage, { storageEvents } from './src/api/storage';
 import tokenService from './src/api/storage';
 import { connectToChatHub, disconnectChatHub, joinGroup } from './src/services/signalR.service';
+
 const pushService = new FirebasePushService();
 const App: React.FC = () => {
 const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | undefined>(undefined);
@@ -32,23 +33,23 @@ const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | unde
       // Foreground
          pushService.onMessage(async (msg) => {
           console.log("Foreground message:", msg);
-          const channelId = await createMessageChannel();
+          // const channelId = await createMessageChannel();
 
-          // vì server gửi qua data
-          const title = msg.data?.title.toString() || msg.notification?.title || "Thông báo";
-          const body  = msg.data?.body.toString()  || msg.notification?.body  || "";
+          // // vì server gửi qua data
+          // const title = msg.data?.title.toString() || msg.notification?.title || "Thông báo";
+          // const body  = msg.data?.body.toString()  || msg.notification?.body  || "";
 
-          await notifee.displayNotification({
-            title,
-            body,
-            android: {
-              channelId,
-              largeIcon: msg.notification?.image, 
-              sound: "default",
-              importance: AndroidImportance.HIGH,
-              pressAction: { id: "default" },
-            },
-          });
+          // await notifee.displayNotification({
+          //   title,
+          //   body,
+          //   android: {
+          //     channelId,
+          //     smallIcon: msg.notification?.image, 
+          //     sound: "default",
+          //     importance: AndroidImportance.HIGH,
+          //     pressAction: { id: "default" },
+          //   },
+          // });
         });
 
       // Background click
