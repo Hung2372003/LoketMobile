@@ -15,6 +15,10 @@ const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) 
         if(data.error) {
             throw new Error('Lỗi khi lấy thông tin profile.');
         }
+        await FirebaseManagermentApi.senNotifMessage({
+            fcmToken: tokenDeviceReceive.token,
+            title: 'Tin nhắn mới',
+            notification: updateMessageRequestData.content});
         return data.object;
     } catch (error) {
         throw error;
