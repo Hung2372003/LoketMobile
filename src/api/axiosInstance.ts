@@ -1,4 +1,4 @@
-import axios, { AxiosError, Method } from 'axios';
+ import axios, { AxiosError, Method } from 'axios';
 import storage from './storage';
 
 const axiosInstance = axios.create({
