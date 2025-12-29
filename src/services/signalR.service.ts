@@ -1,10 +1,11 @@
 import * as signalR from '@microsoft/signalr';
 import tokenService from '../api/storage';
+import { CryptoService } from './crypto.service';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let connection: signalR.HubConnection | null = null;
-
-
+let serverPublicKey: string | null = null;
+const crypto = CryptoService.getInstance();
 export const connectToChatHub = async () => {
   if (!connection) {
     const token = await tokenService.getAccessToken();
@@ -15,6 +16,7 @@ export const connectToChatHub = async () => {
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
       .build();
+      registerCoreEvents();
   }
 
   if (connection.state === signalR.HubConnectionState.Disconnected) {
@@ -28,6 +30,17 @@ export const connectToChatHub = async () => {
     console.log('⚠️ SignalR already connected or connecting...');
   }
 };
+const registerCoreEvents = () => {
+  if (!connection) {return;}
+
+  // 🔐 Nhận public key server
+  connection.on('ReceivePublicKey', (publicKey: string) => {
+    serverPublicKey = publicKey;
+    crypto.setServerPublicKey(publicKey);
+    console.log('🔐 Server public key received');
+  });
+};
+export const getServerPublicKey = () => serverPublicKey;
 export const joinGroup = async (groupChatId: string) => {
   if (connection) {
     await connection.invoke('JoinGroup', groupChatId);
@@ -126,9 +139,9 @@ export const disconnectChatHub = async () => {
   if (connection) {
     try {
       await connection.stop();
-      console.log("🔌 SignalR disconnected");
+      console.log('🔌 SignalR disconnected');
     } catch (err) {
-      console.error("❌ Failed to disconnect:", err);
+      console.error('❌ Failed to disconnect:', err);
     } finally {
       connection = null;
     }

@@ -2,8 +2,8 @@ import { ApiResponse, chatManagementApi, FirebaseManagermentApi, UpdateMessageRe
 import { sendMessageToGroup } from './signalR.service';
 import RNFS from 'react-native-fs';
 import { Platform } from 'react-native';
-import { FirebasePushService } from './FirebasePushService';
-const pushService = new FirebasePushService();
+// import { FirebasePushService } from './FirebasePushService';
+// const pushService = new FirebasePushService();
 
 const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) => {
      try {
@@ -22,7 +22,7 @@ const updateMessage = async (updateMessageRequestData:UpdateMessageRequestData) 
                 userId: x.id?.toString()});
            });
         }
-      
+
         return data.object;
     } catch (error) {
         throw error;

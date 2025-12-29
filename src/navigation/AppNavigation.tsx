@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import PhoneLogin from '../pages/auths/login/PhoneLogin.tsx';
@@ -16,6 +16,7 @@ import ListPhotoScreen from '../pages/main-screen/ListPhotoScreen.tsx';
 import { ChatHistory } from '../pages/chat-history/ChatHistory.tsx';
 import RegisterName from '../pages/auths/register/RegisterName.tsx';
 import PhotoPreviewScreen from '../pages/main-screen/PhotoPreviewScreen.tsx';
+import { CryptoService } from '../services/crypto.service.ts';
 export type RootStackParamList = {
   ChatBox: {
     userCode?:number;
@@ -47,8 +48,21 @@ export type RootStackParamList = {
 interface AppNavigationProps {
   initialRouteName?: keyof RootStackParamList;
 }
+
+
+
 const Stack = createStackNavigator<RootStackParamList>();
+const cryptoService = CryptoService.getInstance();
 const AppNavigation: React.FC<AppNavigationProps> = ({ initialRouteName }) => {
+  useEffect(() => {
+  const setupKeys = async () => {
+    const keys = await cryptoService.initKeys();
+    console.log("Public Key:", keys.publicKey);
+    console.log("Private Key:", keys.privateKey);
+  };
+  setupKeys();
+}, []);
+
   return (
     <Stack.Navigator initialRouteName={initialRouteName ?? "HomeRegister"} screenOptions={{
       headerShown: false,

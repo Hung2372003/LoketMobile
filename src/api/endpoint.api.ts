@@ -1,5 +1,6 @@
+import { CryptoService } from './../services/crypto.service';
 import { callApi } from './axiosInstance';
-
+const cryptoService = CryptoService.getInstance();
 export const chatManagementApi = {
   newMessageAllGroup: (): Promise<ApiResponse<Array<MessageReponse>>> =>
     callApi<ApiResponse<Array<MessageReponse>>>('ActionMessage/GetAllMessageGroups', 'get'),
@@ -8,23 +9,38 @@ export const chatManagementApi = {
     callApi<{count:number}>('ActionMessage/GetUnreadMessageCount','get'),
 
   createChatBox: (data: ReqestChatBox): Promise<ApiResponse<object>> =>{
+    data.RSAPublicKey = cryptoService.getPublicKey() || '';
     return callApi<ApiResponse<object>>('ChatBox/CreateWindowChat', 'post', data);
   },
-  updateMessage: (data:UpdateMessageRequestData): Promise<ApiResponse<Array<any>>> => {
-      const formData = new FormData();
-      formData.append('groupChatId',data.groupChatId);
-      formData.append('content',data.content);
-      if (data.file && data.file.length > 0) {
-        data.file.forEach((f) => {
-          formData.append('fileUpload', {
-            uri: f.uri,
-            name: f.name,
-            type: f.type,
-          } as any);
-        });
-      }
-    return  callApi<ApiResponse<Array<any>>>('ChatBox/AddNewMessage', 'post', formData);
+  updateMessage: async (
+    data: UpdateMessageRequestData
+  ): Promise<ApiResponse<Array<any>>> => {
+
+    const cryptoService = CryptoService.getInstance();
+    const aesSessionKey = cryptoService.generateAESKey();
+    const encryptedContent = cryptoService.encryptWithAES(
+      data.content ?? '',
+      aesSessionKey
+    );
+
+    const encryptedAesKey = await cryptoService.encryptForServer(aesSessionKey);
+
+    const formData = new FormData();
+    formData.append('groupChatId', String(data.groupChatId));
+    formData.append('content', encryptedContent);
+    formData.append('aesKey', encryptedAesKey);
+    if (data.file?.length) {
+      data.file.forEach((f) => {
+        formData.append('fileUpload', {
+          uri: f.uri,
+          name: f.name,
+          type: f.type,
+        } as any);
+      });
+    }
+    return callApi<ApiResponse<Array<any>>>( 'ChatBox/AddNewMessage', 'post', formData);
   },
+
 
   setStatusMess: (groupChatId:number): Promise<ApiResponse<object>> =>
     callApi<ApiResponse<object>>('ActionMessage/SetStatusReadMessage', 'patch', groupChatId),
@@ -89,7 +105,8 @@ export interface GetFeelPostReponse{
 }
 export interface ReqestChatBox{
   groupChatId?:number,
-  userCode?:number
+  userCode?:number,
+  RSAPublicKey?:string,
 }
 
 export interface UploadedFile {
@@ -102,6 +119,8 @@ export interface UpdateMessageRequestData {
  groupChatId: number;
   content?: string;
   file?:Array<UploadedFile>
+  aesKey?: string;
+
 }
 
 export interface ListUserReponse {
