@@ -11,6 +11,7 @@ export const connectToChatHub = async () => {
     const token = await tokenService.getAccessToken();
     connection = new signalR.HubConnectionBuilder()
       .withUrl('http://hungdepzaisieucapvutru.runasp.net/hub', {
+        //  .withUrl('https://localhost:44334//hub', {
         accessTokenFactory: () => token || '',
       })
       .withAutomaticReconnect()

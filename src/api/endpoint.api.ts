@@ -1,5 +1,6 @@
 import { CryptoService } from './../services/crypto.service';
 import { callApi } from './axiosInstance';
+
 const cryptoService = CryptoService.getInstance();
 export const chatManagementApi = {
   newMessageAllGroup: (): Promise<ApiResponse<Array<MessageReponse>>> =>
@@ -17,18 +18,19 @@ export const chatManagementApi = {
   ): Promise<ApiResponse<Array<any>>> => {
 
     const cryptoService = CryptoService.getInstance();
-    const aesSessionKey = cryptoService.generateAESKey();
+
+    const aesKey = cryptoService.generateAESKey();
     const encryptedContent = cryptoService.encryptWithAES(
       data.content ?? '',
-      aesSessionKey
+      aesKey
     );
 
-    const encryptedAesKey = await cryptoService.encryptForServer(aesSessionKey);
+    const encryptedAesKey = await cryptoService.encryptForServer(aesKey);
 
     const formData = new FormData();
     formData.append('groupChatId', String(data.groupChatId));
     formData.append('content', encryptedContent);
-    formData.append('aesKey', encryptedAesKey);
+    formData.append('AESKeyEncrypted', encryptedAesKey);
     if (data.file?.length) {
       data.file.forEach((f) => {
         formData.append('fileUpload', {

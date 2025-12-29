@@ -3,10 +3,12 @@ import storage from './storage';
 
 const axiosInstance = axios.create({
   baseURL: 'http://hungdepzaisieucapvutru.runasp.net',
+  //  baseURL: 'https://localhost:44334/',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
 
 // Interceptor: Tự động đính kèm Access Token vào mỗi request
 axiosInstance.interceptors.request.use(
@@ -25,6 +27,7 @@ axiosInstance.interceptors.request.use(
 export default axiosInstance;
 
 const apiUrl = 'http://hungdepzaisieucapvutru.runasp.net/api';
+// const apiUrl = 'https://localhost:44334/api';
 function handleError(error: AxiosError) {
   if (error.response) {
     console.log('API Error:', error.response.status, error.response.data);
